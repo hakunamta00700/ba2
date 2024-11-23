@@ -1,6 +1,6 @@
 import tkinter as tk
 from typing import Callable
-from ..config.constants import (
+from config.constants import (
     FONT_SIZES,
     LAYOUT,
     LABEL_TEXTS,

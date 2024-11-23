@@ -14,13 +14,14 @@ from config.constants import (
     BARCODE,
     SYSTEM_MESSAGES,
     TIMING,
-    DATE_FORMATS
+    DATE_FORMATS,
+    FILE_PATHS
 )
 from .components.barcode_entry import BarcodeEntryGroup
 from .components.buttons import ButtonGroup
 from .components.labels import ResultLabel, LastBarcodeLabel, UserInfoLabels
-from ..services.barcode_service import BarcodeService
-from ..services.data_service import DataService
+from services.barcode_service import BarcodeService
+from services.data_service import DataService
 
 class MainWindow:
     def __init__(self):
@@ -316,3 +317,22 @@ class MainWindow:
         current_directory = os.path.dirname(os.path.abspath(__file__))
         target_script = os.path.join(current_directory, "parts_counter.py")
         subprocess.Popen(["python", target_script]) 
+
+    def auto_tab(self, event, next_widget):
+        """바코드 입력 필드 자동 탭 처리"""
+        entry_widget = event.widget
+        if len(entry_widget.get()) == BARCODE["LENGTH"]:
+            next_widget.focus_set() 
+
+    def determine_filename(self, tray_value, uc_value):
+        """트레이와 UC 값에 따른 파일명 결정"""
+        if tray_value == TRAY_VALUES["TRAY1"] and uc_value == UC_VALUES["UC1"]:
+            return FILE_PATHS["TRAY1_UC1"]
+        elif tray_value == TRAY_VALUES["TRAY1"] and uc_value == UC_VALUES["UC2"]:
+            return FILE_PATHS["TRAY1_UC2"]
+        elif tray_value == TRAY_VALUES["TRAY2"] and uc_value == UC_VALUES["UC1"]:
+            return FILE_PATHS["TRAY2_UC1"]
+        elif tray_value == TRAY_VALUES["TRAY2"] and uc_value == UC_VALUES["UC2"]:
+            return FILE_PATHS["TRAY2_UC2"]
+        else:
+            return FILE_PATHS["UNKNOWN"] 

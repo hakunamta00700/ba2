@@ -1,4 +1,4 @@
-from src.config.constants import (
+from config.constants import (
     WINDOW_CONFIG, 
     FONT_SIZES, 
     BARCODE_PREFIXES,
@@ -19,8 +19,8 @@ from src.config.constants import (
     UC_VALUES,
     DATE_FORMATS
 )
-from src.config.settings import settings
-from src.ui.main_window import MainWindow
+from config.settings import settings
+from ui.main_window import MainWindow
 
 def main():
     """메인 프로그램 실행"""
