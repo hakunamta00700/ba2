@@ -89,8 +89,12 @@ class DataService:
             FILE_PATHS["UNKNOWN"],
             FILE_PATHS["TRAY1_UC1"],
             FILE_PATHS["TRAY1_UC2"],
+            FILE_PATHS["TRAY1_UC3"],
+            FILE_PATHS["TRAY1_UC4"],
             FILE_PATHS["TRAY2_UC1"],
             FILE_PATHS["TRAY2_UC2"],
+            FILE_PATHS["TRAY2_UC3"],
+            FILE_PATHS["TRAY2_UC4"],
         ]
         for file_name in files_to_check:
             with open(file_name, "r") as f:

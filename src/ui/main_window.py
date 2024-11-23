@@ -259,6 +259,16 @@ class MainWindow:
                     barcodes["barcode1"], barcodes["barcode2"], 
                     barcodes["barcode3"], barcodes["barcode4"]
                 )
+            elif self.uc_var.get() == UC_VALUES["UC3"]:
+                error_messages, invalid_barcodes = self.barcode_service.process_tray1_uc3(
+                    barcodes["barcode1"], barcodes["barcode2"], 
+                    barcodes["barcode3"], barcodes["barcode4"]
+                )
+            elif self.uc_var.get() == UC_VALUES["UC4"]:
+                error_messages, invalid_barcodes = self.barcode_service.process_tray1_uc4(
+                    barcodes["barcode1"], barcodes["barcode2"], 
+                    barcodes["barcode3"], barcodes["barcode4"]
+                )
         elif self.tray_var.get() == TRAY_VALUES["TRAY2"]:
             if self.uc_var.get() == UC_VALUES["UC1"]:
                 error_messages, invalid_barcodes = self.barcode_service.process_tray2_uc1(
@@ -267,6 +277,16 @@ class MainWindow:
                 )
             elif self.uc_var.get() == UC_VALUES["UC2"]:
                 error_messages, invalid_barcodes = self.barcode_service.process_tray2_uc2(
+                    barcodes["barcode1"], barcodes["barcode2"], 
+                    barcodes["barcode3"], barcodes["barcode4"]
+                )
+            elif self.uc_var.get() == UC_VALUES["UC3"]:
+                error_messages, invalid_barcodes = self.barcode_service.process_tray2_uc3(
+                    barcodes["barcode1"], barcodes["barcode2"], 
+                    barcodes["barcode3"], barcodes["barcode4"]
+                )
+            elif self.uc_var.get() == UC_VALUES["UC4"]:
+                error_messages, invalid_barcodes = self.barcode_service.process_tray2_uc4(
                     barcodes["barcode1"], barcodes["barcode2"], 
                     barcodes["barcode3"], barcodes["barcode4"]
                 )
@@ -353,9 +373,17 @@ class MainWindow:
             return FILE_PATHS["TRAY1_UC1"]
         elif tray_value == TRAY_VALUES["TRAY1"] and uc_value == UC_VALUES["UC2"]:
             return FILE_PATHS["TRAY1_UC2"]
+        elif tray_value == TRAY_VALUES["TRAY1"] and uc_value == UC_VALUES["UC3"]:
+            return FILE_PATHS["TRAY1_UC3"]
+        elif tray_value == TRAY_VALUES["TRAY1"] and uc_value == UC_VALUES["UC4"]:
+            return FILE_PATHS["TRAY1_UC4"]
         elif tray_value == TRAY_VALUES["TRAY2"] and uc_value == UC_VALUES["UC1"]:
             return FILE_PATHS["TRAY2_UC1"]
         elif tray_value == TRAY_VALUES["TRAY2"] and uc_value == UC_VALUES["UC2"]:
             return FILE_PATHS["TRAY2_UC2"]
+        elif tray_value == TRAY_VALUES["TRAY2"] and uc_value == UC_VALUES["UC3"]:
+            return FILE_PATHS["TRAY2_UC3"]
+        elif tray_value == TRAY_VALUES["TRAY2"] and uc_value == UC_VALUES["UC4"]:
+            return FILE_PATHS["TRAY2_UC4"]
         else:
             return FILE_PATHS["UNKNOWN"] 

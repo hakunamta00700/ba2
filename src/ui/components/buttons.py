@@ -120,25 +120,17 @@ class ButtonGroup:
 
     def _create_uc_buttons(self):
         """UC 선택 라디오 버튼 생성"""
-        self.uc1_button = tk.Radiobutton(
-            self.root,
-            text=UC_VALUES["UC1"],
-            variable=self.uc_var,
-            value=UC_VALUES["UC1"],
-            font=FONT_SIZES["MEDIUM"],
-            state="disabled"
-        )
-        self.uc1_button.place(**LAYOUT["BUTTONS"]["UC1"])
-
-        self.uc2_button = tk.Radiobutton(
-            self.root,
-            text=UC_VALUES["UC2"],
-            variable=self.uc_var,
-            value=UC_VALUES["UC2"],
-            font=FONT_SIZES["MEDIUM"],
-            state="disabled"
-        )
-        self.uc2_button.place(**LAYOUT["BUTTONS"]["UC2"])
+        self.uc_buttons = {}
+        for uc_key, uc_text in UC_VALUES.items():
+            self.uc_buttons[uc_key] = tk.Radiobutton(
+                self.root,
+                text=uc_text,
+                variable=self.uc_var,
+                value=uc_text,
+                font=FONT_SIZES["MEDIUM"],
+                state="disabled"
+            )
+            self.uc_buttons[uc_key].place(**LAYOUT["BUTTONS"][uc_key])
 
     def _create_shift_buttons(self):
         """시프트 선택 버튼 생성"""
@@ -174,17 +166,17 @@ class ButtonGroup:
 
     def enable_uc_buttons(self):
         """UC 버튼 활성화"""
-        self.uc1_button.configure(state="normal")
-        self.uc2_button.configure(state="normal")
+        for button in self.uc_buttons.values():
+            button.configure(state="normal")
 
     def disable_uc_buttons(self):
         """UC 버튼 비활성화"""
-        self.uc1_button.configure(state="disabled")
-        self.uc2_button.configure(state="disabled")
+        for button in self.uc_buttons.values():
+            button.configure(state="disabled")
 
     def deselect_all(self):
         """모든 라디오 버튼 선택 해제"""
         self.tray1_button.deselect()
         self.tray2_button.deselect()
-        self.uc1_button.deselect()
-        self.uc2_button.deselect() 
+        for button in self.uc_buttons.values():
+            button.deselect() 

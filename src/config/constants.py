@@ -16,17 +16,25 @@ FONT_SIZES = {
 BARCODE_LENGTH = 10
 BARCODE_PREFIXES = {
     "TRAY1_UC1": "HKAD",
-    "TRAY1_UC2": "TKAD", 
+    "TRAY1_UC2": "TKAD",
+    "TRAY1_UC3": "MKAD",
+    "TRAY1_UC4": "NKAD",
     "TRAY2_UC1": "HKAE",
-    "TRAY2_UC2": "TKAE"
+    "TRAY2_UC2": "TKAE",
+    "TRAY2_UC3": "MKAE",
+    "TRAY2_UC4": "NKAE"
 }
 
 # 파일 관련 상수
 FILE_PATHS = {
     "TRAY1_UC1": "barcodes_TRAY1_UC1.txt",
-    "TRAY1_UC2": "barcodes_TRAY1_UC2.txt", 
+    "TRAY1_UC2": "barcodes_TRAY1_UC2.txt",
+    "TRAY1_UC3": "barcodes_TRAY1_UC3.txt",
+    "TRAY1_UC4": "barcodes_TRAY1_UC4.txt",
     "TRAY2_UC1": "barcodes_TRAY2_UC1.txt",
     "TRAY2_UC2": "barcodes_TRAY2_UC2.txt",
+    "TRAY2_UC3": "barcodes_TRAY2_UC3.txt",
+    "TRAY2_UC4": "barcodes_TRAY2_UC4.txt",
     "UNKNOWN": "barcodes_unknown.txt",
     "LOCAL_DATA": "local_data.txt",
     "SCAN_LOG": "scan_log.txt"
@@ -53,7 +61,11 @@ ERROR_MESSAGES = {
     "TRAY2_UC2_WRONG": "Wrong barcode scanned. You have scanned a barcode that is not tray 2 UC-2!! STOP! Check labels on part Alert supervisor and quality department!",
     "TRAY2_LABEL": "You have scanned a Tray 2 Tennessee label!! DO NOT PASS PART! STOP! Check labels on part Alert supervisor and quality department!",
     "NO_BARCODE": "No barcode has been successfully scanned.",
-    "BARCODE_CLEARED": "Last scanned barcode cleared."
+    "BARCODE_CLEARED": "Last scanned barcode cleared.",
+    "TRAY1_UC3_WRONG": "You have scanned a barcode that is not TRAY 1 UC-3!!. STOP! Check labels on part Alert supervisor and quality department!",
+    "TRAY1_UC4_WRONG": "You have scanned a barcode that is not TRAY 1 UC-4!!. STOP! Check labels on part Alert supervisor and quality department!",
+    "TRAY2_UC3_WRONG": "Wrong barcodes scanned. You have scanned barcodes that are not tray 2 UC-3!! STOP! Check labels on part Alert supervisor and quality department!",
+    "TRAY2_UC4_WRONG": "Wrong barcode scanned. You have scanned a barcode that is not tray 2 UC-4!! STOP! Check labels on part Alert supervisor and quality department!"
 }
 
 # 시간 관련 상수
@@ -74,6 +86,8 @@ LAYOUT = {
         "TRAY2": {"x": 1300, "y": 310},
         "UC1": {"x": 1300, "y": 380},
         "UC2": {"x": 1300, "y": 450},
+        "UC3": {"x": 1300, "y": 520},
+        "UC4": {"x": 1300, "y": 590},
         "CLOSE": {"x": 100, "y": 300},
         "LOG_OFF": {"x": 100, "y": 250},
         "CLEAR_BARCODES": {"x": 550, "y": 850},
@@ -129,7 +143,7 @@ SYSTEM_MESSAGES = {
     "INTERNET_ERROR": "Internet connection issue. Saving data locally.",
     "SYNC_ERROR": "Failed to sync data: {}",
     "REMINDER_TITLE": "Reminder",
-    "REMINDER_MESSAGE": "Please select UC-1 or UC-2 before trying to scan barcodes."
+    "REMINDER_MESSAGE": "Please select UC-1, UC-2, UC-3 or UC-4 before trying to scan barcodes."
 }
 
 # 색상 관련 상수
@@ -171,7 +185,9 @@ BUTTON_TEXTS = {
     "TRAY1": "TRAY 1",
     "TRAY2": "TRAY 2",
     "UC1": "UC-1",
-    "UC2": "UC-2"
+    "UC2": "UC-2",
+    "UC3": "UC-3",
+    "UC4": "UC-4"
 }
 
 # 라벨 텍스트 상수
@@ -201,7 +217,9 @@ TRAY_VALUES = {
 # UC 값 상수
 UC_VALUES = {
     "UC1": "UC-1",
-    "UC2": "UC-2"
+    "UC2": "UC-2",
+    "UC3": "UC-3",
+    "UC4": "UC-4"
 }
 
 # 날짜/시간 포맷 상수
