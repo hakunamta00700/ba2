@@ -31,10 +31,9 @@ class ResultLabel:
         """에러 메시지 표시"""
         self.label.config(
             text=message,
-            font=FONT_SIZES["MEDIUM"],
-            fg=COLORS["BLACK"],
-            bg=COLORS["ERROR_BG"],
-            wraplength=STYLES["LABEL_WRAPLENGTH"],
+            font=("Helvetica", 14),
+            fg="red",
+            bg="yellow",
         )
     
     def clear(self):
