@@ -15,7 +15,10 @@ from config.constants import (
     SYSTEM_MESSAGES,
     TIMING,
     DATE_FORMATS,
-    FILE_PATHS
+    FILE_PATHS,
+    FONT_SIZES,
+    STYLES,
+    UC_VALUES
 )
 from .components.barcode_entry import BarcodeEntryGroup
 from .components.buttons import ButtonGroup
@@ -99,6 +102,26 @@ class MainWindow:
         
         # 초기 상태 설정
         self.barcode_entries.set_state("disabled")
+        
+        # name_entry와 shift_entry 생성 추가
+        self.name_entry = tk.Entry(
+            self.root,
+            justify=STYLES["ENTRY_JUSTIFY"],
+            textvariable=self.name_var,
+            font=FONT_SIZES["LARGE"]
+        )
+        self.name_entry.place(**LAYOUT["ENTRIES"]["NAME"])
+        self.name_entry.focus_set()
+        self.name_var.trace("w", self.scan_barcodes)
+
+        self.shift_entry = tk.Entry(
+            self.root,
+            justify=STYLES["ENTRY_JUSTIFY"],
+            textvariable=self.shift_var,
+            font=FONT_SIZES["LARGE"]
+        )
+        self.shift_entry.place(**LAYOUT["ENTRIES"]["SHIFT"])
+        self.shift_var.trace("w", self.scan_barcodes)
         
     def _setup_bindings(self):
         """키 바인딩 설정"""
