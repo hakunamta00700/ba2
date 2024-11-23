@@ -7,7 +7,7 @@ import requests
 from requests.exceptions import ConnectionError, Timeout, RequestException
 import socket  # Import socket for handling socket.gaierror
 import json
-
+# 프로그램 시작
 
 # Global URL
 url = 'http://192.168.68.124/includes/insert_barcode_injection.php'
