@@ -1,24 +1,27 @@
 [tool.poetry]
-name = "barcode"
+name = "barcode-verification"
 version = "0.1.0"
-description = ""
-authors = ["David Cho <csi00700@gmail.com>"]
-readme = "README.md"
+description = "Daejin barcode verification program"
+authors = ["Your Name <your.email@example.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.12"
-requests = "^2.32.3"
+python = "^3.8"
+requests = "^2.28.0"
+python-dotenv = "^0.19.0"
+tkinter = "*"
 
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^8.3.3"
-pytest-cov = "^6.0.0"
-pytest-mock = "^3.14.0"
-isort = "^5.13.2"
-flake8 = "^7.1.1"
-mypy = "^1.13.0"
-pre-commit = "^4.0.1"
+[tool.poetry.dev-dependencies]
+pytest = "^7.0.0"
+pytest-mock = "^3.10.0"
+pytest-cov = "^4.0.0"
+black = "^22.0.0"
+isort = "^5.10.0"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = ["tests"]

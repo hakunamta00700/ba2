@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from ..config.constants import (
+from config.constants import (
     BARCODE_PREFIXES,
     ERROR_MESSAGES,
     BARCODE
@@ -23,7 +23,7 @@ class BarcodeService:
                 invalid_barcodes.append(barcode_name)
         return invalid_barcodes
 
-    def process_tray1_uc1(self, barcode1: str, barcode2: str, barcode3: str, barcode4: str) -> List[str]:
+    def process_tray1_uc1(self, barcode1: str, barcode2: str, barcode3: str, barcode4: str) -> Tuple[List[str], List[str]]:
         error_messages = []
         invalid_barcodes = self.check_barcodes_against_first(
             barcode1, barcode2, barcode3, barcode4

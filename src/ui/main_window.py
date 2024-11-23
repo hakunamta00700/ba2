@@ -4,7 +4,7 @@ import subprocess
 import os
 import datetime
 
-from ..config.constants import (
+from config.constants import (
     WINDOW_CONFIG,
     KEY_BINDINGS,
     LAYOUT,

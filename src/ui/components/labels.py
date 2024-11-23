@@ -1,5 +1,5 @@
 import tkinter as tk
-from ...config.constants import (
+from config.constants import (
     FONT_SIZES,
     LAYOUT,
     LABEL_TEXTS,

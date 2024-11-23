@@ -4,13 +4,13 @@ import requests
 from requests.exceptions import ConnectionError, Timeout, RequestException
 import socket
 
-from ..config.constants import (
+from config.constants import (
     API_CONFIG,
     FILE_PATHS,
     SYSTEM_MESSAGES,
     DATE_FORMATS
 )
-from ..config.settings import settings
+from config.settings import settings
 
 class DataService:
     def __init__(self):
