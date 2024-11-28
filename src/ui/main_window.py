@@ -123,6 +123,15 @@ class MainWindow:
         self.shift_entry.place(**LAYOUT["ENTRIES"]["SHIFT"])
         self.shift_var.trace("w", self.scan_barcodes)
         
+        # 설정 관리 버튼 추가
+        self.config_button = tk.Button(
+            self.root,
+            text="설정 관리",
+            font=FONT_SIZES["MEDIUM"],
+            command=self._open_config_manager
+        )
+        self.config_button.place(x=100, y=350)  # 위치는 적절히 조정
+        
     def _setup_bindings(self):
         """키 바인딩 설정"""
         self.root.bind_all("<Key>", self.handle_keys)
@@ -356,3 +365,8 @@ class MainWindow:
             return FILE_PATHS["TRAY2_UC4"]
         else:
             return FILE_PATHS["UNKNOWN"] 
+
+    def _open_config_manager(self):
+        """설정 관리 창 열기"""
+        from .config_manager_window import ConfigManagerWindow
+        config_window = ConfigManagerWindow(self.root) 
