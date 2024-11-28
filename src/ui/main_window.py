@@ -31,6 +31,10 @@ class MainWindow:
         self.root = tk.Tk()
         self.barcode_service = BarcodeService()
         self.data_service = DataService()
+        
+        # 필요한 파일들 생성 확인
+        self.data_service.ensure_barcode_files_exist()
+        
         self._setup_window()
         self._setup_variables()
         self._setup_components()
@@ -347,24 +351,8 @@ class MainWindow:
 
     def determine_filename(self, tray_value, uc_value):
         """트레이와 UC 값에 따른 파일명 결정"""
-        if tray_value == TRAY_VALUES["TRAY1"] and uc_value == UC_VALUES["UC1"]:
-            return FILE_PATHS["TRAY1_UC1"]
-        elif tray_value == TRAY_VALUES["TRAY1"] and uc_value == UC_VALUES["UC2"]:
-            return FILE_PATHS["TRAY1_UC2"]
-        elif tray_value == TRAY_VALUES["TRAY1"] and uc_value == UC_VALUES["UC3"]:
-            return FILE_PATHS["TRAY1_UC3"]
-        elif tray_value == TRAY_VALUES["TRAY1"] and uc_value == UC_VALUES["UC4"]:
-            return FILE_PATHS["TRAY1_UC4"]
-        elif tray_value == TRAY_VALUES["TRAY2"] and uc_value == UC_VALUES["UC1"]:
-            return FILE_PATHS["TRAY2_UC1"]
-        elif tray_value == TRAY_VALUES["TRAY2"] and uc_value == UC_VALUES["UC2"]:
-            return FILE_PATHS["TRAY2_UC2"]
-        elif tray_value == TRAY_VALUES["TRAY2"] and uc_value == UC_VALUES["UC3"]:
-            return FILE_PATHS["TRAY2_UC3"]
-        elif tray_value == TRAY_VALUES["TRAY2"] and uc_value == UC_VALUES["UC4"]:
-            return FILE_PATHS["TRAY2_UC4"]
-        else:
-            return FILE_PATHS["UNKNOWN"] 
+        key = f"{tray_value}_{uc_value}"
+        return FILE_PATHS.get(key, FILE_PATHS["UNKNOWN"])
 
     def _open_config_manager(self):
         """설정 관리 창 열기"""

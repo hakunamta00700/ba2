@@ -4,6 +4,7 @@ from config.constants import (
     FONT_SIZES,
     LAYOUT,
     BUTTON_TEXTS,
+    SHIFT_VALUES,
     config  # ConfigManager 인스턴스 추가
 )
 
@@ -104,10 +105,15 @@ class ButtonGroup:
                 variable=self.tray_var,
                 value=tray.id,
                 font=FONT_SIZES["MEDIUM"],
-                command=self.callbacks["tray_selected"]
+                command=lambda t=tray: self._on_tray_selected(t)  # 트레이 선택 이벤트 처리
             )
-            # LAYOUT에서 해당 트레이의 위치 정보 가져오기
             self.tray_buttons[tray.id].place(**LAYOUT["BUTTONS"][tray.id])
+
+    def _on_tray_selected(self, tray):
+        """트레이 선택 시 처리"""
+        self.uc_var.set("")  # UC 선택 초기화
+        self.callbacks["tray_selected"]()  # 콜백 실행
+        self.enable_uc_buttons()  # UC 버튼 활성화
 
     def _create_uc_buttons(self):
         """UC 선택 라디오 버튼 동적 생성"""
@@ -167,15 +173,18 @@ class ButtonGroup:
                     button.configure(state="normal")
                 else:
                     button.configure(state="disabled")
+                    if self.uc_var.get() == uc_id:
+                        self.uc_var.set("")  # 비활성화된 UC 선택 해제
 
     def disable_uc_buttons(self):
         """UC 버튼 비활성화"""
+        self.uc_var.set("")  # UC 선택 해제
         for button in self.uc_buttons.values():
             button.configure(state="disabled")
 
     def deselect_all(self):
         """모든 라디오 버튼 선택 해제"""
-        self.tray1_button.deselect()
-        self.tray2_button.deselect()
-        for button in self.uc_buttons.values():
-            button.deselect() 
+        self.tray_var.set("")  # 트레이 선택 해제
+        self.uc_var.set("")    # UC 선택 해제
+        self.disable_uc_buttons()  # UC 버튼 비활성화
+    

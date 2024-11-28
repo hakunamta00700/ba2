@@ -150,7 +150,7 @@ class ConfigManagerWindow:
                     
         config.save_config()
         self._load_current_config()
-        messagebox.showinfo("알림", "설정이 저장되었습니다.")
+        messagebox.showinfo("알림", "설정이 저장되었습니다. 변경사항을 적용하려면 프로그램을 다시 시작하세요.")
         
     def _clear_form(self):
         """입력 폼 초기화"""

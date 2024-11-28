@@ -17,7 +17,12 @@ FONT_SIZES = {
 }
 
 # 바코드 관련 상수
-BARCODE_LENGTH = 10
+BARCODE = {
+    "LENGTH": 10,
+    "MIN_SERIES_NUMBER": 64000  # 바코드 시리즈 번호 최소값
+}
+
+# 동적으로 바코드 프리픽스 생성
 BARCODE_PREFIXES = {
     f"{tray.id}_{uc.id}": uc.barcodePrefix 
     for tray in config.trays 
@@ -25,12 +30,16 @@ BARCODE_PREFIXES = {
     if uc.id in tray.allowedUCs
 }
 
-# 파일 관련 상수
+# 동적으로 파일 경로 생성
 FILE_PATHS = {
     f"{tray.id}_{uc.id}": f"barcodes_{tray.id}_{uc.id}.txt"
     for tray in config.trays
     for uc in config.ucs
     if uc.id in tray.allowedUCs
+} | {
+    "UNKNOWN": "barcodes_unknown.txt",
+    "LOCAL_DATA": "local_data.txt",
+    "SCAN_LOG": "scan_log.txt"
 }
 
 # API 관련 상수
@@ -48,17 +57,16 @@ ERROR_MESSAGES = {
     "OLD_SERIES": "You have scanned an old series label! STOP! Check labels on part Alert supervisor and quality department!",
     "WRONG_TRAY": "Wrong barcodes scanned. You have scanned barcodes that are not {} !! STOP! Check labels on part Alert supervisor and quality department!",
     "MISMATCH_BARCODES": "Some of your barcodes are not the same as the first one! Do not pass part. Recheck your labels!",
-    "TRAY1_UC1_WRONG": "You have scanned a barcode that is not TRAY 1 UC-1!!. STOP! Check labels on part Alert supervisor and quality department!",
-    "TRAY1_UC2_WRONG": "You have scanned a barcode that is not TRAY 1 UC-2!!. STOP! Check labels on part Alert supervisor and quality department!",
-    "TRAY2_UC1_WRONG": "Wrong barcodes scanned. You have scanned barcodes that are not tray 2 UC-1!! STOP! Check labels on part Alert supervisor and quality department!",
-    "TRAY2_UC2_WRONG": "Wrong barcode scanned. You have scanned a barcode that is not tray 2 UC-2!! STOP! Check labels on part Alert supervisor and quality department!",
-    "TRAY2_LABEL": "You have scanned a Tray 2 Tennessee label!! DO NOT PASS PART! STOP! Check labels on part Alert supervisor and quality department!",
     "NO_BARCODE": "No barcode has been successfully scanned.",
-    "BARCODE_CLEARED": "Last scanned barcode cleared.",
-    "TRAY1_UC3_WRONG": "You have scanned a barcode that is not TRAY 1 UC-3!!. STOP! Check labels on part Alert supervisor and quality department!",
-    "TRAY1_UC4_WRONG": "You have scanned a barcode that is not TRAY 1 UC-4!!. STOP! Check labels on part Alert supervisor and quality department!",
-    "TRAY2_UC3_WRONG": "Wrong barcodes scanned. You have scanned barcodes that are not tray 2 UC-3!! STOP! Check labels on part Alert supervisor and quality department!",
-    "TRAY2_UC4_WRONG": "Wrong barcode scanned. You have scanned a barcode that is not tray 2 UC-4!! STOP! Check labels on part Alert supervisor and quality department!"
+    "BARCODE_CLEARED": "Last scanned barcode cleared."
+}
+
+SYSTEM_MESSAGES = {
+    "SELECT_TRAY": "PLEASE SELECT A TRAY BEFORE SCANNING BARCODES.",
+    "INTERNET_ERROR": "Internet connection issue. Saving data locally.",
+    "SYNC_ERROR": "Failed to sync data: {}",
+    "REMINDER_TITLE": "Reminder",
+    "REMINDER_MESSAGE": "Please select UC before trying to scan barcodes."
 }
 
 # 시간 관련 상수
@@ -69,27 +77,31 @@ TIMING = {
     "CLEAR_RESULT": 15000,  # 15 seconds for clearing result
     "INTERNET_TIMEOUT": 3000,  # 3 seconds for internet check
     "BACKGROUND_CLEAR": 10000  # 10 seconds for clearing background
-} 
+}
 
 # UI 레이아웃 관련 상수
 LAYOUT = {
     "BUTTONS": {
+        # 동적으로 TRAY 버튼 위치 생성
+        **{
+            tray.id: {"x": 1300, "y": 242 + (i * 68)}
+            for i, tray in enumerate(config.trays)
+        },
+        # 동적으로 UC 버튼 위치 생성
+        **{
+            uc.id: {"x": 1300 + (i // 2 * 300), "y": 380 + (i % 2 * 70)}
+            for i, uc in enumerate(config.ucs)
+        },
         "CLEAR_LAST_SCANNED": {"x": 355, "y": 195},
-        "TRAY1": {"x": 1300, "y": 242},
-        "TRAY2": {"x": 1300, "y": 310},
-        "UC1": {"x": 1300, "y": 380},
-        "UC2": {"x": 1300, "y": 450},
-        "UC3": {"x": 1600, "y": 380},
-        "UC4": {"x": 1600, "y": 450},
         "CLOSE": {"x": 100, "y": 300},
         "LOG_OFF": {"x": 100, "y": 250},
         "CLEAR_BARCODES": {"x": 550, "y": 850},
         "DISABLE_ALL": {"x": 100, "y": 195},
         "ENABLE_SCANNER": {"x": 550, "y": 800},
         "ENABLE_SHIFT": {"x": 742, "y": 25},
-        "THIRD_SHIFT": {"x": 400, "y": 140},
-        "SECOND_SHIFT": {"x": 230, "y": 140},
         "FIRST_SHIFT": {"x": 100, "y": 140},
+        "SECOND_SHIFT": {"x": 230, "y": 140},
+        "THIRD_SHIFT": {"x": 400, "y": 140},
         "COUNT": {"x": 546, "y": 140}
     },
     "LABELS": {
@@ -124,21 +136,6 @@ STYLES = {
     "ENTRY_JUSTIFY": "center"
 }
 
-# 바코드 관련 상수 (기존 드에 추가)
-BARCODE = {
-    "LENGTH": 10,
-    "MIN_SERIES_NUMBER": 64000  # 바코드 시리즈 번호 최소값
-}
-
-# 메시지 상수 추가
-SYSTEM_MESSAGES = {
-    "SELECT_TRAY": "PLEASE SELECT A TRAY BEFORE SCANNING BARCODES.",
-    "INTERNET_ERROR": "Internet connection issue. Saving data locally.",
-    "SYNC_ERROR": "Failed to sync data: {}",
-    "REMINDER_TITLE": "Reminder",
-    "REMINDER_MESSAGE": "Please select UC-1, UC-2, UC-3 or UC-4 before trying to scan barcodes."
-}
-
 # 색상 관련 상수
 COLORS = {
     "ERROR_FG": "red",
@@ -171,16 +168,10 @@ BUTTON_TEXTS = {
     "DISABLE_ALL": "Disable ALL inputs",
     "ENABLE_SCANNER": "Enable Scanner",
     "ENABLE_NAME_SHIFT": "Enable name/shift",
-    "THIRD_SHIFT": "Third Shift",
-    "SECOND_SHIFT": "Second Shift",
     "FIRST_SHIFT": "First Shift",
-    "OPEN_COUNTER": "Open parts counter",
-    "TRAY1": "TRAY 1",
-    "TRAY2": "TRAY 2",
-    "UC1": "UC-1",
-    "UC2": "UC-2",
-    "UC3": "UC-3",
-    "UC4": "UC-4"
+    "SECOND_SHIFT": "Second Shift",
+    "THIRD_SHIFT": "Third Shift",
+    "OPEN_COUNTER": "Open parts counter"
 }
 
 # 라벨 텍스트 상수
@@ -194,29 +185,26 @@ LABEL_TEXTS = {
     "LAST_BARCODE": "Last Scanned Barcode Set:"
 }
 
-# 시프트 값 상수
-SHIFT_VALUES = {
-    "FIRST": "First Shift",
-    "SECOND": "Second Shift",
-    "THIRD": "Third Shift"
-}
-
-# 트레이 값 상수
-TRAY_VALUES = {
-    "TRAY1": "TRAY 1",
-    "TRAY2": "TRAY 2"
-}
-
-# UC 값 상수
-UC_VALUES = {
-    "UC1": "UC-1",
-    "UC2": "UC-2",
-    "UC3": "UC-3",
-    "UC4": "UC-4"
-}
-
 # 날짜/시간 포맷 상수
 DATE_FORMATS = {
     "LOG_TIME": "%d %B %H:%M",
     "DATETIME": "%Y-%m-%d %H:%M:%S"
+}
+
+# TRAY와 UC 값 상수 동적 생성
+TRAY_VALUES = {
+    tray.id: tray.name
+    for tray in config.trays
+}
+
+UC_VALUES = {
+    uc.id: uc.name
+    for uc in config.ucs
+}
+
+# 시프트 값 상수 (기존 코드에 없었던 부분도 추가)
+SHIFT_VALUES = {
+    "FIRST": "First Shift",
+    "SECOND": "Second Shift",
+    "THIRD": "Third Shift"
 } 

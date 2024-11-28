@@ -3,6 +3,7 @@ import json
 import requests
 from requests.exceptions import ConnectionError, Timeout, RequestException
 import socket
+import os
 
 from config.constants import (
     API_CONFIG,
@@ -100,3 +101,10 @@ class DataService:
             with open(file_name, "r") as f:
                 files_content[file_name] = f.readlines()
         return files_content 
+
+    def ensure_barcode_files_exist(self):
+        """필요한 바코드 파일들이 존재하는지 확인하고 없으면 생성"""
+        for filepath in FILE_PATHS.values():
+            if not os.path.exists(filepath):
+                with open(filepath, 'w') as f:
+                    pass  # 빈 파일 생성 

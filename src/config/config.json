@@ -3,12 +3,22 @@
     {
       "id": "TRAY1",
       "name": "TRAY 1",
-      "allowedUCs": ["UC1", "UC2", "UC3", "UC4"]
+      "allowedUCs": [
+        "UC1",
+        "UC2",
+        "UC3",
+        "UC4"
+      ]
     },
     {
       "id": "TRAY2",
       "name": "TRAY 2",
-      "allowedUCs": ["UC1", "UC2", "UC3", "UC4"]
+      "allowedUCs": [
+        "UC1",
+        "UC2",
+        "UC3",
+        "UC4"
+      ]
     }
   ],
   "ucs": [

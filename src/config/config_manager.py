@@ -1,6 +1,7 @@
 import json
 from dataclasses import dataclass
 from typing import List
+import os
 
 @dataclass
 class UCConfig:
@@ -16,14 +17,40 @@ class TrayConfig:
 
 class ConfigManager:
     def __init__(self):
-        self.config_file = "src/config/config.json"
+        self.config_file = os.path.join(os.path.dirname(__file__), "config.json")
         self.load_config()
     
     def load_config(self):
-        with open(self.config_file, 'r') as f:
-            data = json.load(f)
-            self.trays = [TrayConfig(**tray) for tray in data['trays']]
-            self.ucs = [UCConfig(**uc) for uc in data['ucs']]
+        try:
+            with open(self.config_file, 'r') as f:
+                data = json.load(f)
+                self.trays = [TrayConfig(**tray) for tray in data['trays']]
+                self.ucs = [UCConfig(**uc) for uc in data['ucs']]
+        except FileNotFoundError:
+            # 기본 설정 생성
+            self._create_default_config()
+            self.save_config()
+    
+    def _create_default_config(self):
+        """기본 설정 생성"""
+        self.trays = [
+            TrayConfig(
+                id="TRAY1",
+                name="TRAY 1",
+                allowedUCs=["UC1", "UC2", "UC3", "UC4"]
+            ),
+            TrayConfig(
+                id="TRAY2",
+                name="TRAY 2",
+                allowedUCs=["UC1", "UC2", "UC3", "UC4"]
+            )
+        ]
+        self.ucs = [
+            UCConfig(id="UC1", name="UC-1", barcodePrefix="HKAD"),
+            UCConfig(id="UC2", name="UC-2", barcodePrefix="TKAD"),
+            UCConfig(id="UC3", name="UC-3", barcodePrefix="LHAE"),
+            UCConfig(id="UC4", name="UC-4", barcodePrefix="LHAD")
+        ]
     
     def save_config(self):
         data = {
