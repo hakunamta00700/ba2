@@ -4,9 +4,7 @@ from config.constants import (
     FONT_SIZES,
     LAYOUT,
     BUTTON_TEXTS,
-    TRAY_VALUES,
-    UC_VALUES,
-    SHIFT_VALUES
+    config  # ConfigManager 인스턴스 추가
 )
 
 class ButtonGroup:
@@ -97,40 +95,34 @@ class ButtonGroup:
         self.count_button.place(**LAYOUT["BUTTONS"]["COUNT"])
 
     def _create_tray_buttons(self):
-        """트레이 선택 라디오 버튼 생성"""
-        self.tray1_button = tk.Radiobutton(
-            self.root,
-            text=TRAY_VALUES["TRAY1"],
-            variable=self.tray_var,
-            value=TRAY_VALUES["TRAY1"],
-            font=FONT_SIZES["MEDIUM"],
-            command=self.callbacks["tray_selected"]
-        )
-        self.tray1_button.place(**LAYOUT["BUTTONS"]["TRAY1"])
-
-        self.tray2_button = tk.Radiobutton(
-            self.root,
-            text=TRAY_VALUES["TRAY2"],
-            variable=self.tray_var,
-            value=TRAY_VALUES["TRAY2"],
-            font=FONT_SIZES["MEDIUM"],
-            command=self.callbacks["tray_selected"]
-        )
-        self.tray2_button.place(**LAYOUT["BUTTONS"]["TRAY2"])
+        """트레이 선택 라디오 버튼 동적 생성"""
+        self.tray_buttons = {}
+        for tray in config.trays:
+            self.tray_buttons[tray.id] = tk.Radiobutton(
+                self.root,
+                text=tray.name,
+                variable=self.tray_var,
+                value=tray.id,
+                font=FONT_SIZES["MEDIUM"],
+                command=self.callbacks["tray_selected"]
+            )
+            # LAYOUT에서 해당 트레이의 위치 정보 가져오기
+            self.tray_buttons[tray.id].place(**LAYOUT["BUTTONS"][tray.id])
 
     def _create_uc_buttons(self):
-        """UC 선택 라디오 버튼 생성"""
+        """UC 선택 라디오 버튼 동적 생성"""
         self.uc_buttons = {}
-        for uc_key, uc_text in UC_VALUES.items():
-            self.uc_buttons[uc_key] = tk.Radiobutton(
+        for uc in config.ucs:
+            self.uc_buttons[uc.id] = tk.Radiobutton(
                 self.root,
-                text=uc_text,
+                text=uc.name,
                 variable=self.uc_var,
-                value=uc_text,
+                value=uc.id,
                 font=FONT_SIZES["MEDIUM"],
                 state="disabled"
             )
-            self.uc_buttons[uc_key].place(**LAYOUT["BUTTONS"][uc_key])
+            # LAYOUT에서 해당 UC의 위치 정보 가져오기
+            self.uc_buttons[uc.id].place(**LAYOUT["BUTTONS"][uc.id])
 
     def _create_shift_buttons(self):
         """시프트 선택 버튼 생성"""
@@ -165,9 +157,16 @@ class ButtonGroup:
         self.callbacks["focus_barcode1"]()
 
     def enable_uc_buttons(self):
-        """UC 버튼 활성화"""
-        for button in self.uc_buttons.values():
-            button.configure(state="normal")
+        """선택된 트레이에 허용된 UC 버튼만 활성화"""
+        selected_tray = self.tray_var.get()
+        tray_config = next((tray for tray in config.trays if tray.id == selected_tray), None)
+        
+        if tray_config:
+            for uc_id, button in self.uc_buttons.items():
+                if uc_id in tray_config.allowedUCs:
+                    button.configure(state="normal")
+                else:
+                    button.configure(state="disabled")
 
     def disable_uc_buttons(self):
         """UC 버튼 비활성화"""

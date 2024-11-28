@@ -235,11 +235,13 @@ class MainWindow:
         name = self.name_var.get()
         shift = self.shift_var.get()
         barcodes = self.barcode_entries.get_values()
+        tray_id = self.tray_var.get()
+        uc_id = self.uc_var.get()
 
         error_messages = []
 
         # 기본 검증
-        if not self.tray_var.get():
+        if not tray_id:
             error_messages.append(SYSTEM_MESSAGES["SELECT_TRAY"])
             self.barcode_entries.entries["barcode1"].focus_set()
 
@@ -247,49 +249,16 @@ class MainWindow:
             error_messages.append(ERROR_MESSAGES["NO_LOGIN"])
             self.barcode_entries.entries["barcode1"].focus_set()
 
-        # 트레이와 UC 선택에 따른 바코드 검증
-        if self.tray_var.get() == TRAY_VALUES["TRAY1"]:
-            if self.uc_var.get() == UC_VALUES["UC1"]:
-                error_messages, invalid_barcodes = self.barcode_service.process_tray1_uc1(
-                    barcodes["barcode1"], barcodes["barcode2"], 
-                    barcodes["barcode3"], barcodes["barcode4"]
-                )
-            elif self.uc_var.get() == UC_VALUES["UC2"]:
-                error_messages, invalid_barcodes = self.barcode_service.process_tray1_uc2(
-                    barcodes["barcode1"], barcodes["barcode2"], 
-                    barcodes["barcode3"], barcodes["barcode4"]
-                )
-            elif self.uc_var.get() == UC_VALUES["UC3"]:
-                error_messages, invalid_barcodes = self.barcode_service.process_tray1_uc3(
-                    barcodes["barcode1"], barcodes["barcode2"], 
-                    barcodes["barcode3"], barcodes["barcode4"]
-                )
-            elif self.uc_var.get() == UC_VALUES["UC4"]:
-                error_messages, invalid_barcodes = self.barcode_service.process_tray1_uc4(
-                    barcodes["barcode1"], barcodes["barcode2"], 
-                    barcodes["barcode3"], barcodes["barcode4"]
-                )
-        elif self.tray_var.get() == TRAY_VALUES["TRAY2"]:
-            if self.uc_var.get() == UC_VALUES["UC1"]:
-                error_messages, invalid_barcodes = self.barcode_service.process_tray2_uc1(
-                    barcodes["barcode1"], barcodes["barcode2"], 
-                    barcodes["barcode3"], barcodes["barcode4"]
-                )
-            elif self.uc_var.get() == UC_VALUES["UC2"]:
-                error_messages, invalid_barcodes = self.barcode_service.process_tray2_uc2(
-                    barcodes["barcode1"], barcodes["barcode2"], 
-                    barcodes["barcode3"], barcodes["barcode4"]
-                )
-            elif self.uc_var.get() == UC_VALUES["UC3"]:
-                error_messages, invalid_barcodes = self.barcode_service.process_tray2_uc3(
-                    barcodes["barcode1"], barcodes["barcode2"], 
-                    barcodes["barcode3"], barcodes["barcode4"]
-                )
-            elif self.uc_var.get() == UC_VALUES["UC4"]:
-                error_messages, invalid_barcodes = self.barcode_service.process_tray2_uc4(
-                    barcodes["barcode1"], barcodes["barcode2"], 
-                    barcodes["barcode3"], barcodes["barcode4"]
-                )
+        if not error_messages:
+            # 바코드 검증
+            error_messages, invalid_barcodes = self.barcode_service.process_barcodes(
+                tray_id,
+                uc_id,
+                barcodes["barcode1"],
+                barcodes["barcode2"],
+                barcodes["barcode3"],
+                barcodes["barcode4"]
+            )
 
         # 에러가 없으면 바코드 배경색 초기화
         if not error_messages:

@@ -1,3 +1,7 @@
+from .config_manager import ConfigManager
+
+config = ConfigManager()
+
 # UI 관련 상수
 WINDOW_CONFIG = {
     "TITLE": "Daejin barcode verification program designed by clint terry",
@@ -15,29 +19,18 @@ FONT_SIZES = {
 # 바코드 관련 상수
 BARCODE_LENGTH = 10
 BARCODE_PREFIXES = {
-    "TRAY1_UC1": "HKAD",
-    "TRAY1_UC2": "TKAD",
-    "TRAY1_UC3": "LHAE",
-    "TRAY1_UC4": "LHAD",
-    "TRAY2_UC1": "HKAE",
-    "TRAY2_UC2": "TKAE",
-    "TRAY2_UC3": "LHAE",
-    "TRAY2_UC4": "LHAD"
+    f"{tray.id}_{uc.id}": uc.barcodePrefix 
+    for tray in config.trays 
+    for uc in config.ucs 
+    if uc.id in tray.allowedUCs
 }
 
 # 파일 관련 상수
 FILE_PATHS = {
-    "TRAY1_UC1": "barcodes_TRAY1_UC1.txt",
-    "TRAY1_UC2": "barcodes_TRAY1_UC2.txt",
-    "TRAY1_UC3": "barcodes_TRAY1_UC3.txt",
-    "TRAY1_UC4": "barcodes_TRAY1_UC4.txt",
-    "TRAY2_UC1": "barcodes_TRAY2_UC1.txt",
-    "TRAY2_UC2": "barcodes_TRAY2_UC2.txt",
-    "TRAY2_UC3": "barcodes_TRAY2_UC3.txt",
-    "TRAY2_UC4": "barcodes_TRAY2_UC4.txt",
-    "UNKNOWN": "barcodes_unknown.txt",
-    "LOCAL_DATA": "local_data.txt",
-    "SCAN_LOG": "scan_log.txt"
+    f"{tray.id}_{uc.id}": f"barcodes_{tray.id}_{uc.id}.txt"
+    for tray in config.trays
+    for uc in config.ucs
+    if uc.id in tray.allowedUCs
 }
 
 # API 관련 상수

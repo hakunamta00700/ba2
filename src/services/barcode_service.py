@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Tuple
-
-from config.constants import BARCODE, BARCODE_PREFIXES, ERROR_MESSAGES
+from config.constants import BARCODE, BARCODE_PREFIXES, ERROR_MESSAGES, config
 
 
 @dataclass
@@ -13,11 +12,47 @@ class BarcodeValidationResult:
 class BarcodeService:
     def __init__(self):
         self.validation_mapping = {
-            "TRAY1_UC1": self._validate_tray1_uc1,
-            "TRAY1_UC2": self._validate_tray1_uc2,
-            "TRAY2_UC1": self._validate_tray2_uc1,
-            "TRAY2_UC2": self._validate_tray2_uc2,
+            f"{tray.id}_{uc.id}": self._create_validator(tray.id, uc.id)
+            for tray in config.trays
+            for uc in config.ucs
+            if uc.id in tray.allowedUCs
         }
+
+    def _create_validator(self, tray_id: str, uc_id: str) -> callable:
+        """동적으로 검증 함수 생성"""
+        def validator(barcodes: List[str]) -> BarcodeValidationResult:
+            error_messages = []
+            invalid_barcodes = self._check_barcodes_against_first(barcodes)
+            
+            prefix = BARCODE_PREFIXES[f"{tray_id}_{uc_id}"]
+            if not self._validate_prefix(barcodes, prefix):
+                error_messages.append(
+                    ERROR_MESSAGES["WRONG_TRAY"].format(f"{tray_id} {uc_id}")
+                )
+            elif invalid_barcodes:
+                error_messages.append(ERROR_MESSAGES["MISMATCH_BARCODES"])
+                
+            # 시리즈 번호 검증
+            if not error_messages and any(
+                not self._check_series_number(barcode)
+                for barcode in barcodes
+                if barcode.startswith(prefix)
+            ):
+                error_messages.append(ERROR_MESSAGES["OLD_SERIES"])
+                invalid_barcodes = ["barcode1", "barcode2", "barcode3", "barcode4"]
+                
+            return BarcodeValidationResult(error_messages, invalid_barcodes)
+            
+        return validator
+
+    def process_barcodes(self, tray_id: str, uc_id: str, *barcodes) -> Tuple[List[str], List[str]]:
+        """통합된 바코드 처리 메서드"""
+        validator = self.validation_mapping.get(f"{tray_id}_{uc_id}")
+        if not validator:
+            return (["Invalid tray or UC combination"], [])
+            
+        result = validator(list(barcodes))
+        return result.error_messages, result.invalid_barcodes
 
     def _check_barcodes_against_first(self, barcodes: List[str]) -> List[str]:
         """바코드 일치 여부 검증"""
@@ -42,151 +77,3 @@ class BarcodeService:
             return barcode_number >= BARCODE["MIN_SERIES_NUMBER"]
         except ValueError:
             return False
-
-    def _validate_common(
-        self, barcodes: List[str], prefix: str, error_message: str
-    ) -> BarcodeValidationResult:
-        """공통 검증 로직"""
-        error_messages = []
-        invalid_barcodes = self._check_barcodes_against_first(barcodes)
-
-        if not self._validate_prefix(barcodes, BARCODE_PREFIXES[prefix]):
-            error_messages.append(error_message)
-        elif invalid_barcodes:
-            error_messages.append(ERROR_MESSAGES["MISMATCH_BARCODES"])
-
-        return BarcodeValidationResult(error_messages, invalid_barcodes)
-
-    def _validate_tray1_uc1(self, barcodes: List[str]) -> BarcodeValidationResult:
-        result = self._validate_common(
-            barcodes, "TRAY1_UC1", ERROR_MESSAGES["TRAY1_UC1_WRONG"]
-        )
-
-        if not result.error_messages:
-            if any(
-                barcode.startswith(BARCODE_PREFIXES["TRAY2_UC2"])
-                for barcode in barcodes
-            ):
-                result.error_messages.append(ERROR_MESSAGES["TRAY2_LABEL"])
-
-            if any(
-                not self._check_series_number(barcode)
-                for barcode in barcodes
-                if barcode.startswith(BARCODE_PREFIXES["TRAY1_UC1"])
-            ):
-                result.error_messages.append(ERROR_MESSAGES["OLD_SERIES"])
-
-        return result
-
-    def _validate_tray1_uc2(self, barcodes: List[str]) -> BarcodeValidationResult:
-        """TRAY1_UC2 검증 로직"""
-        return self._validate_common(
-            barcodes, "TRAY1_UC2", ERROR_MESSAGES["TRAY1_UC2_WRONG"]
-        )
-
-    def _validate_tray2_uc1(self, barcodes: List[str]) -> BarcodeValidationResult:
-        """TRAY2_UC1 검증 로직"""
-        result = self._validate_common(
-            barcodes, "TRAY2_UC1", ERROR_MESSAGES["TRAY2_UC1_WRONG"]
-        )
-
-        if not result.error_messages:
-            if any(
-                not self._check_series_number(barcode)
-                for barcode in barcodes
-                if barcode.startswith(BARCODE_PREFIXES["TRAY2_UC1"])
-            ):
-                result.error_messages.append(ERROR_MESSAGES["OLD_SERIES"])
-                result.invalid_barcodes = [
-                    "barcode1",
-                    "barcode2",
-                    "barcode3",
-                    "barcode4",
-                ]
-
-        return result
-
-    def _validate_tray2_uc2(self, barcodes: List[str]) -> BarcodeValidationResult:
-        """TRAY2_UC2 검증 로직"""
-        return self._validate_common(
-            barcodes, "TRAY2_UC2", ERROR_MESSAGES["TRAY2_UC2_WRONG"]
-        )
-
-    def _validate_tray1_uc3(self, barcodes: List[str]) -> BarcodeValidationResult:
-        """TRAY1_UC3 검증 로직"""
-        return self._validate_common(
-            barcodes, "TRAY1_UC3", ERROR_MESSAGES["TRAY1_UC3_WRONG"]
-        )
-
-    def _validate_tray1_uc4(self, barcodes: List[str]) -> BarcodeValidationResult:
-        """TRAY1_UC4 검증 로직"""
-        return self._validate_common(
-            barcodes, "TRAY1_UC4", ERROR_MESSAGES["TRAY1_UC4_WRONG"]
-        )
-
-    def _validate_tray2_uc3(self, barcodes: List[str]) -> BarcodeValidationResult:
-        """TRAY2_UC3 검증 로직"""
-        return self._validate_common(
-            barcodes, "TRAY2_UC3", ERROR_MESSAGES["TRAY2_UC3_WRONG"]
-        )
-
-    def _validate_tray2_uc4(self, barcodes: List[str]) -> BarcodeValidationResult:
-        """TRAY2_UC4 검증 로직"""
-        return self._validate_common(
-            barcodes, "TRAY2_UC4", ERROR_MESSAGES["TRAY2_UC4_WRONG"]
-        )
-
-    # 기존 public 메서드들 - 내부적으로 새로운 구현 사용
-    def check_barcodes_against_first(
-        self, barcode1: str, barcode2: str, barcode3: str, barcode4: str
-    ) -> List[str]:
-        barcodes = [barcode1, barcode2, barcode3, barcode4]
-        return self._check_barcodes_against_first(barcodes)
-
-    def process_tray1_uc1(
-        self, barcode1: str, barcode2: str, barcode3: str, barcode4: str
-    ) -> Tuple[List[str], List[str]]:
-        result = self._validate_tray1_uc1([barcode1, barcode2, barcode3, barcode4])
-        return result.error_messages, result.invalid_barcodes
-
-    def process_tray1_uc2(
-        self, barcode1: str, barcode2: str, barcode3: str, barcode4: str
-    ) -> Tuple[List[str], List[str]]:
-        result = self._validate_tray1_uc2([barcode1, barcode2, barcode3, barcode4])
-        return result.error_messages, result.invalid_barcodes
-
-    def process_tray2_uc1(
-        self, barcode1: str, barcode2: str, barcode3: str, barcode4: str
-    ) -> Tuple[List[str], List[str]]:
-        result = self._validate_tray2_uc1([barcode1, barcode2, barcode3, barcode4])
-        return result.error_messages, result.invalid_barcodes
-
-    def process_tray2_uc2(
-        self, barcode1: str, barcode2: str, barcode3: str, barcode4: str
-    ) -> Tuple[List[str], List[str]]:
-        result = self._validate_tray2_uc2([barcode1, barcode2, barcode3, barcode4])
-        return result.error_messages, result.invalid_barcodes
-
-    def process_tray1_uc3(
-        self, barcode1: str, barcode2: str, barcode3: str, barcode4: str
-    ) -> Tuple[List[str], List[str]]:
-        result = self._validate_tray1_uc3([barcode1, barcode2, barcode3, barcode4])
-        return result.error_messages, result.invalid_barcodes
-
-    def process_tray1_uc4(
-        self, barcode1: str, barcode2: str, barcode3: str, barcode4: str
-    ) -> Tuple[List[str], List[str]]:
-        result = self._validate_tray1_uc4([barcode1, barcode2, barcode3, barcode4])
-        return result.error_messages, result.invalid_barcodes
-
-    def process_tray2_uc3(
-        self, barcode1: str, barcode2: str, barcode3: str, barcode4: str
-    ) -> Tuple[List[str], List[str]]:
-        result = self._validate_tray2_uc3([barcode1, barcode2, barcode3, barcode4])
-        return result.error_messages, result.invalid_barcodes
-
-    def process_tray2_uc4(
-        self, barcode1: str, barcode2: str, barcode3: str, barcode4: str
-    ) -> Tuple[List[str], List[str]]:
-        result = self._validate_tray2_uc4([barcode1, barcode2, barcode3, barcode4])
-        return result.error_messages, result.invalid_barcodes
