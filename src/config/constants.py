@@ -17,12 +17,12 @@ BARCODE_LENGTH = 10
 BARCODE_PREFIXES = {
     "TRAY1_UC1": "HKAD",
     "TRAY1_UC2": "TKAD",
-    "TRAY1_UC3": "MKAD",
-    "TRAY1_UC4": "NKAD",
+    "TRAY1_UC3": "LHAE",
+    "TRAY1_UC4": "LHAD",
     "TRAY2_UC1": "HKAE",
     "TRAY2_UC2": "TKAE",
-    "TRAY2_UC3": "MKAE",
-    "TRAY2_UC4": "NKAE"
+    "TRAY2_UC3": "LHAE",
+    "TRAY2_UC4": "LHAD"
 }
 
 # 파일 관련 상수
