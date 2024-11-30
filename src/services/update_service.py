@@ -150,7 +150,7 @@ class UpdateService:
         safe_update_dir = update_dir.replace('\\', '/')
         safe_current_exe = current_exe.replace('\\', '/')
         
-        script_content = f'''# -*- coding: utf-8 -*-
+        script_content = '''# -*- coding: utf-8 -*-
 import os
 import shutil
 import time
@@ -169,13 +169,13 @@ def update_version_file(target_dir, latest_version):
         # VERSION 변수 업데이트
         new_content = re.sub(
             r'VERSION = "[^"]+"',
-            f'VERSION = "{latest_version}"',
+            f'VERSION = "{{latest_version}}"',
             content
         )
         
         with open(version_file, 'w', encoding='utf-8') as f:
             f.write(new_content)
-        print(f"버전 정보를 {latest_version}로 업데이트했습니다.")
+        print(f"버전 정보를 {{latest_version}}로 업데이트했습니다.")
 
 def main():
     try:
@@ -184,8 +184,8 @@ def main():
         time.sleep(2)
 
         # 파일 교체
-        source_dir = r"{safe_update_dir}"
-        target_dir = os.path.dirname(r"{safe_current_exe}")
+        source_dir = r"''' + safe_update_dir + '''"
+        target_dir = os.path.dirname(r"''' + safe_current_exe + '''")
 
         # 압축 해제된 첫 번째 디렉토리 찾기 (GitHub 압축 파일 구조)
         subdirs = [d for d in os.listdir(source_dir) if os.path.isdir(os.path.join(source_dir, d))]
