@@ -6,6 +6,8 @@ import zipfile
 from packaging import version
 from config.version import VERSION, GITHUB_REPO
 from dotenv import load_dotenv
+import subprocess
+import traceback
 
 class UpdateService:
     def __init__(self):
@@ -101,15 +103,21 @@ class UpdateService:
     
     def _perform_update(self, update_dir):
         """실제 업데이트 수행"""
-        # 현재 실행 파일 경로
-        current_exe = sys.executable
-        
-        # 업데이트 스크립트 생성
-        update_script = self._create_update_script(current_exe, update_dir)
-        
-        # 업데이트 스크립트 실행
-        os.system(f'start /B python "{update_script}"')
-        sys.exit(0)
+        try:
+            # 현재 실행 파일 경로
+            current_exe = sys.executable
+            
+            # 업데이트 스크립트 생성
+            update_script = self._create_update_script(current_exe, update_dir)
+            
+            # 업데이트 스크립트 실행
+            subprocess.Popen([sys.executable, update_script], 
+                            creationflags=subprocess.CREATE_NEW_CONSOLE)
+            sys.exit(0)
+        except Exception as e:
+            print(f"업데이트 스크립트 실행 중 오류 발생: {e}")
+            traceback.print_exc()
+            return False
     
     def _create_update_script(self, current_exe, update_dir):
         """업데이트 스크립트 생성"""
@@ -129,20 +137,33 @@ def main():
     try:
         print("업데이트 설치를 시작합니다...")
         # 원본 프로그램이 종료될 때까지 대기
-        time.sleep(1)
+        time.sleep(2)
 
         # 파일 교체
         source_dir = r"{safe_update_dir}"
         target_dir = os.path.dirname(r"{safe_current_exe}")
 
-        print("파일 복사 중...")
+        # 압축 해제된 첫 번째 디렉토리 찾기 (GitHub 압축 파일 구조)
+        subdirs = [d for d in os.listdir(source_dir) if os.path.isdir(os.path.join(source_dir, d))]
+        if subdirs:
+            source_dir = os.path.join(source_dir, subdirs[0])
+
+        print(f"파일 복사 중... (소스: {{source_dir}})")
+        
+        # src 디렉토리 찾기
+        src_dir = os.path.join(source_dir, 'src')
+        if os.path.exists(src_dir):
+            source_dir = src_dir
+            
         # 파일 복사
         for root, dirs, files in os.walk(source_dir):
             for file in files:
                 if file.endswith('.py'):
                     source_path = os.path.join(root, file)
                     relative_path = os.path.relpath(source_path, source_dir)
-                    target_path = os.path.join(target_dir, relative_path)
+                    target_path = os.path.join(target_dir, 'src', relative_path)
+                    
+                    print(f"복사 중: {{relative_path}}")
                     os.makedirs(os.path.dirname(target_path), exist_ok=True)
                     shutil.copy2(source_path, target_path)
 
@@ -156,24 +177,20 @@ def main():
         process = subprocess.Popen(
             [python_exe, main_script],
             cwd=target_dir,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True
+            creationflags=subprocess.CREATE_NEW_CONSOLE
         )
         
         # 프로세스가 시작되었는지 확인
         time.sleep(2)
         if process.poll() is None:
             print("프로그램이 성공적으로 재시작되었습니다.")
+            time.sleep(1)
         else:
-            stdout, stderr = process.communicate()
-            print("프로그램 시작 실패:")
-            print("표준 출력:", stdout)
-            print("오류 출력:", stderr)
+            print("프로그램 시작 실패")
             input("계속하려면 아무 키나 누르세요...")
             
     except Exception as e:
-        print(f"업데이트 중 오류 발생: {e}")
+        print(f"업데이트 중 오류 발생: {{e}}")
         print("상세 오류:")
         traceback.print_exc()
         input("계속하려면 아무 키나 누르세요...")
