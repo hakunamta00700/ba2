@@ -8,6 +8,7 @@ from config.version import VERSION, GITHUB_REPO
 from dotenv import load_dotenv
 import subprocess
 import traceback
+import shutil
 
 class UpdateService:
     def __init__(self):
@@ -73,8 +74,9 @@ class UpdateService:
             
             print(f"다운로드 URL: {download_url}")
             
-            # 임시 디렉토리에 다운로드
-            with tempfile.TemporaryDirectory() as temp_dir:
+            # 임시 디렉토리 생성
+            temp_dir = tempfile.mkdtemp()
+            try:
                 zip_path = os.path.join(temp_dir, "update.zip")
                 
                 # 업데이트 파일 다운로드
@@ -92,9 +94,25 @@ class UpdateService:
                 
                 # 실제 업데이트 수행
                 print("업데이트 설치 중...")
-                self._perform_update(temp_dir)
+                result = self._perform_update(temp_dir)
                 
-            return True
+                # 업데이트 스크립트가 실행된 후에 임시 디렉토리 정리
+                if result:
+                    try:
+                        shutil.rmtree(temp_dir)
+                    except:
+                        pass  # 임시 디렉토리 삭제 실패는 무시
+                    
+                return result
+                
+            except Exception as e:
+                # 오류 발생 시 임시 디렉토리 정리 시도
+                try:
+                    shutil.rmtree(temp_dir)
+                except:
+                    pass
+                raise  # 원래 예외를 다시 발생
+                
         except Exception as e:
             print(f"업데이트 설치 중 오류 발생: {e}")
             if hasattr(e, 'response') and e.response is not None:
@@ -113,7 +131,7 @@ class UpdateService:
             # 업데이트 스크립트 실행
             subprocess.Popen([sys.executable, update_script], 
                             creationflags=subprocess.CREATE_NEW_CONSOLE)
-            sys.exit(0)
+            return True  # sys.exit(0) 대신 True 반환
         except Exception as e:
             print(f"업데이트 스크립트 실행 중 오류 발생: {e}")
             traceback.print_exc()
