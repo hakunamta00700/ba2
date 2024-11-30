@@ -123,30 +123,63 @@ import shutil
 import time
 import subprocess
 import sys
+import traceback
 
-# 원본 프로그램이 종료될 때까지 대기
-time.sleep(1)
+def main():
+    try:
+        print("업데이트 설치를 시작합니다...")
+        # 원본 프로그램이 종료될 때까지 대기
+        time.sleep(1)
 
-# 파일 교체
-source_dir = r"{safe_update_dir}"
-target_dir = os.path.dirname(r"{safe_current_exe}")
+        # 파일 교체
+        source_dir = r"{safe_update_dir}"
+        target_dir = os.path.dirname(r"{safe_current_exe}")
 
-# 파일 복사
-for root, dirs, files in os.walk(source_dir):
-    for file in files:
-        if file.endswith('.py'):
-            source_path = os.path.join(root, file)
-            relative_path = os.path.relpath(source_path, source_dir)
-            target_path = os.path.join(target_dir, relative_path)
-            os.makedirs(os.path.dirname(target_path), exist_ok=True)
-            shutil.copy2(source_path, target_path)
+        print("파일 복사 중...")
+        # 파일 복사
+        for root, dirs, files in os.walk(source_dir):
+            for file in files:
+                if file.endswith('.py'):
+                    source_path = os.path.join(root, file)
+                    relative_path = os.path.relpath(source_path, source_dir)
+                    target_path = os.path.join(target_dir, relative_path)
+                    os.makedirs(os.path.dirname(target_path), exist_ok=True)
+                    shutil.copy2(source_path, target_path)
 
-# 새 버전 실행
-python_exe = sys.executable
-main_script = os.path.join(target_dir, "src", "main.py")
-subprocess.Popen([python_exe, main_script], 
-                creationflags=subprocess.CREATE_NEW_CONSOLE,
-                cwd=target_dir)
+        print("업데이트 완료. 프로그램을 재시작합니다...")
+        
+        # 새 버전 실행
+        python_exe = sys.executable
+        main_script = os.path.join(target_dir, "src", "main.py")
+        
+        # 프로그램 재시작
+        process = subprocess.Popen(
+            [python_exe, main_script],
+            cwd=target_dir,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True
+        )
+        
+        # 프로세스가 시작되었는지 확인
+        time.sleep(2)
+        if process.poll() is None:
+            print("프로그램이 성공적으로 재시작되었습니다.")
+        else:
+            stdout, stderr = process.communicate()
+            print("프로그램 시작 실패:")
+            print("표준 출력:", stdout)
+            print("오류 출력:", stderr)
+            input("계속하려면 아무 키나 누르세요...")
+            
+    except Exception as e:
+        print(f"업데이트 중 오류 발생: {e}")
+        print("상세 오류:")
+        traceback.print_exc()
+        input("계속하려면 아무 키나 누르세요...")
+
+if __name__ == "__main__":
+    main()
 '''
         
         script_path = os.path.join(tempfile.gettempdir(), 'update_script.py')
