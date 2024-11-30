@@ -20,22 +20,16 @@ class TrayConfig:
 
 class ConfigManager:
     def __init__(self):
-        # 실행 파일 디렉토리나 현재 작업 디렉토리에서 config.json 찾기
-        exe_dir = Path(sys.executable).parent if getattr(sys, 'frozen', False) else Path.cwd()
-        self.config_file = exe_dir / "config.json"
-        
-        # src 디렉토리 내의 config.json도 확인
-        src_config = Path(__file__).parent.parent / "config.json"
-        
-        # 존재하는 config.json 파일 사용
-        if self.config_file.exists():
-            print(f"기존 config.json 사용: {self.config_file}")
-        elif src_config.exists():
-            self.config_file = src_config
-            print(f"src 디렉토리의 config.json 사용: {self.config_file}")
+        # PyInstaller onefile 모드를 위한 실행 파일 경로 처리
+        if getattr(sys, 'frozen', False):
+            # PyInstaller로 빌드된 실행 파일의 실제 위치
+            base_path = Path(os.path.dirname(sys.executable))
         else:
-            print(f"새로운 config.json 생성: {self.config_file}")
+            # 개발 환경에서는 프로젝트 루트 디렉토리 사용
+            base_path = Path(__file__).parent.parent.parent
             
+        self.config_file = base_path / "config.json"
+        print(f"설정 파일 경로: {self.config_file}")
         self.load_config()
     
     def load_config(self):
@@ -45,7 +39,7 @@ class ConfigManager:
                 self.trays = [TrayConfig(**tray) for tray in data['trays']]
                 self.ucs = [UCConfig(**uc) for uc in data['ucs']]
         except FileNotFoundError:
-            # 기본 설정으로 새로운 config.json 생성
+            print(f"설정 파일을 찾을 수 없습니다. 기본 설정을 생성합니다: {self.config_file}")
             self._create_default_config()
             self.save_config()
     
