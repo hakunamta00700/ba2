@@ -20,6 +20,7 @@ from config.constants import (
     STYLES,
     UC_VALUES
 )
+from config.version import VERSION
 from .components.barcode_entry import BarcodeEntryGroup
 from .components.buttons import ButtonGroup
 from .components.labels import ResultLabel, LastBarcodeLabel, UserInfoLabels
@@ -56,6 +57,15 @@ class MainWindow:
         self.root.attributes("-fullscreen", False)
         self.root.attributes("-topmost", True)
         self.root.after_idle(self.root.attributes, "-topmost", True)
+        
+        # 버전 레이블 추가
+        version_label = tk.Label(
+            self.root,
+            text=f"v{VERSION}",
+            font=("Arial", 10),
+            fg="gray"
+        )
+        version_label.place(relx=1.0, x=-10, y=5, anchor="ne")
         
     def _setup_variables(self):
         """tkinter 변수 설정"""
