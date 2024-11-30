@@ -7,7 +7,6 @@ a = Analysis(
     datas=[
         ('ui//parts_counter.py', '.'),
         ('..//.env', '.'),
-        ('config.json', '.')
     ],
     hiddenimports=[
     ],
