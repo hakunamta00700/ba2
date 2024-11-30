@@ -113,6 +113,10 @@ class UpdateService:
     
     def _create_update_script(self, current_exe, update_dir):
         """업데이트 스크립트 생성"""
+        # 경로의 백슬래시를 이스케이프하거나 정방향 슬래시로 변환
+        safe_update_dir = update_dir.replace('\\', '/')
+        safe_current_exe = current_exe.replace('\\', '/')
+        
         script_content = f'''# -*- coding: utf-8 -*-
 import os
 import shutil
@@ -122,8 +126,8 @@ import time
 time.sleep(1)
 
 # 파일 교체
-source_dir = "{update_dir}"
-target_dir = os.path.dirname("{current_exe}")
+source_dir = r"{safe_update_dir}"
+target_dir = os.path.dirname(r"{safe_current_exe}")
 
 # 파일 복사
 for root, dirs, files in os.walk(source_dir):
@@ -136,7 +140,7 @@ for root, dirs, files in os.walk(source_dir):
             shutil.copy2(source_path, target_path)
 
 # 새 버전 실행
-os.startfile("{current_exe}")
+os.startfile(r"{safe_current_exe}")
 '''
         
         script_path = os.path.join(tempfile.gettempdir(), 'update_script.py')
