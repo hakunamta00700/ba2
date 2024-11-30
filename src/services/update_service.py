@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import subprocess
 import traceback
 import shutil
+import time
 
 class UpdateService:
     def __init__(self):
@@ -60,6 +61,7 @@ class UpdateService:
     
     def download_and_install_update(self):
         """최신 버전 다운로드 및 설치"""
+        temp_dir = None
         try:
             response = requests.get(self.github_api_url, headers=self.headers)
             response.raise_for_status()
@@ -76,48 +78,39 @@ class UpdateService:
             
             # 임시 디렉토리 생성
             temp_dir = tempfile.mkdtemp()
-            try:
-                zip_path = os.path.join(temp_dir, "update.zip")
-                
-                # 업데이트 파일 다운로드
-                print("업데이트 파일 다운로드 중...")
-                response = requests.get(download_url, headers=self.headers)
-                response.raise_for_status()
-                
-                with open(zip_path, 'wb') as f:
-                    f.write(response.content)
-                
-                # 압축 해제
-                print("파일 압축 해제 중...")
-                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                    zip_ref.extractall(temp_dir)
-                
-                # 실제 업데이트 수행
-                print("업데이트 설치 중...")
-                result = self._perform_update(temp_dir)
-                
-                # 업데이트 스크립트가 실행된 후에 임시 디렉토리 정리
-                if result:
-                    try:
-                        shutil.rmtree(temp_dir)
-                    except:
-                        pass  # 임시 디렉토리 삭제 실패는 무시
-                    
-                return result
-                
-            except Exception as e:
-                # 오류 발생 시 임시 디렉토리 정리 시도
-                try:
-                    shutil.rmtree(temp_dir)
-                except:
-                    pass
-                raise  # 원래 예외를 다시 발생
+            zip_path = os.path.join(temp_dir, "update.zip")
+            
+            # 업데이트 파일 다운로드
+            print("업데이트 파일 다운로드 중...")
+            response = requests.get(download_url, headers=self.headers)
+            response.raise_for_status()
+            
+            with open(zip_path, 'wb') as f:
+                f.write(response.content)
+            
+            # 압축 해제
+            print("파일 압축 해제 중...")
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(temp_dir)
+            
+            # 실제 업데이트 수행
+            print("업데이트 설치 중...")
+            result = self._perform_update(temp_dir)
+            return result
                 
         except Exception as e:
             print(f"업데이트 설치 중 오류 발생: {e}")
             if hasattr(e, 'response') and e.response is not None:
                 print(f"응답 내용: {e.response.text}")
             return False
+        finally:
+            # 업데이트 완료 후 임시 디렉토리 정리
+            if temp_dir and os.path.exists(temp_dir):
+                try:
+                    time.sleep(5)  # 업데이트 스크립트가 파일을 사용할 시간을 줌
+                    shutil.rmtree(temp_dir)
+                except:
+                    pass
     
     def _perform_update(self, update_dir):
         """실제 업데이트 수행"""
@@ -129,9 +122,22 @@ class UpdateService:
             update_script = self._create_update_script(current_exe, update_dir)
             
             # 업데이트 스크립트 실행
-            subprocess.Popen([sys.executable, update_script], 
-                            creationflags=subprocess.CREATE_NEW_CONSOLE)
-            return True  # sys.exit(0) 대신 True 반환
+            process = subprocess.Popen(
+                [sys.executable, update_script],
+                creationflags=subprocess.CREATE_NEW_CONSOLE
+            )
+            
+            # 스크립트가 시작될 때까지 잠시 대기
+            time.sleep(2)
+            
+            # 프로세스가 시작되었는지 확인
+            if process.poll() is None:
+                print("업데이트 스크립트가 성공적으로 시작되었습니다.")
+                sys.exit(0)  # 현재 프로그램 종료
+            else:
+                print("업데이트 스크립트 시작 실패")
+                return False
+                
         except Exception as e:
             print(f"업데이트 스크립트 실행 중 오류 발생: {e}")
             traceback.print_exc()
