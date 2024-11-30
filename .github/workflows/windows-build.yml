@@ -31,10 +31,16 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller
         pip install tzdata
+        pip install delvewheel
+        
+    - name: Copy Windows DLLs
+      run: |
+        $pythonPath = "C:\hostedtoolcache\windows\Python\${{ matrix.python-version }}\x64"
+        Copy-Item "$pythonPath\api-ms-win-*.dll" -Destination "."
         
     - name: Build with PyInstaller
       run: |
-        pyinstaller --clean --windows-dll-fix main.spec
+        pyinstaller --clean main.spec
         
     - name: Create Release
       id: create_release
