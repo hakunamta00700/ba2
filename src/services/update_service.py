@@ -121,6 +121,8 @@ class UpdateService:
 import os
 import shutil
 import time
+import subprocess
+import sys
 
 # 원본 프로그램이 종료될 때까지 대기
 time.sleep(1)
@@ -140,7 +142,11 @@ for root, dirs, files in os.walk(source_dir):
             shutil.copy2(source_path, target_path)
 
 # 새 버전 실행
-os.startfile(r"{safe_current_exe}")
+python_exe = sys.executable
+main_script = os.path.join(target_dir, "src", "main.py")
+subprocess.Popen([python_exe, main_script], 
+                creationflags=subprocess.CREATE_NEW_CONSOLE,
+                cwd=target_dir)
 '''
         
         script_path = os.path.join(tempfile.gettempdir(), 'update_script.py')
