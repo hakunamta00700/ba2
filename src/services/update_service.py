@@ -9,20 +9,39 @@ from config.version import VERSION, GITHUB_REPO
 class UpdateService:
     def __init__(self):
         self.current_version = VERSION
-        self.github_api_url = f"https://api.github.com/repos/{GITHUB_REPO}/releases/latest"
+        self.github_api_url = f"https://api.github.com/repos/{GITHUB_REPO}/releases"
         
     def check_for_updates(self):
         """최신 버전이 있는지 확인"""
         try:
+            # 모든 릴리즈를 가져옴
             response = requests.get(self.github_api_url)
             response.raise_for_status()
             
-            latest_release = response.json()
+            releases = response.json()
+            if not releases:  # 릴리즈가 없는 경우
+                print("아직 릴리즈가 없습니다.")
+                return False
+            
+            # 가장 최신 릴리즈 확인
+            latest_release = releases[0]  # GitHub API는 최신 순으로 정렬됨
             latest_version = latest_release['tag_name'].lstrip('v')
             
-            return version.parse(latest_version) > version.parse(self.current_version)
-        except Exception as e:
-            print(f"업데이트 확인 중 오류 발생: {e}")
+            current_ver = version.parse(self.current_version)
+            latest_ver = version.parse(latest_version)
+            
+            if latest_ver > current_ver:
+                print(f"새로운 버전이 있습니다: v{latest_version}")
+                return True
+            else:
+                print(f"현재 최신 버전을 사용 중입니다: v{self.current_version}")
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code == 404:
+                print("저장소에서 릴리즈를 찾을 수 없습니다. 첫 릴리즈를 기다려주세요.")
+            else:
+                print(f"업데이트 확인 중 오류 발생: {e}")
             return False
             
     def download_and_install_update(self):
@@ -31,7 +50,12 @@ class UpdateService:
             response = requests.get(self.github_api_url)
             response.raise_for_status()
             
-            latest_release = response.json()
+            releases = response.json()
+            if not releases:
+                print("다운로드할 릴리즈가 없습니다.")
+                return False
+                
+            latest_release = releases[0]
             download_url = latest_release['zipball_url']
             
             # 임시 디렉토리에 다운로드
@@ -39,16 +63,18 @@ class UpdateService:
                 zip_path = os.path.join(temp_dir, "update.zip")
                 
                 # 업데이트 파일 다운로드
+                print("업데이트 파일 다운로드 중...")
                 response = requests.get(download_url)
                 with open(zip_path, 'wb') as f:
                     f.write(response.content)
                 
                 # 압축 해제
+                print("파일 압축 해제 중...")
                 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                     zip_ref.extractall(temp_dir)
                 
                 # 여기서 실제 업데이트 프로세스 실행
-                # (현재 실행 파일을 종료하고 새 버전으로 교체)
+                print("업데이트 설치 중...")
                 self._perform_update(temp_dir)
                 
             return True
