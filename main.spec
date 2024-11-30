@@ -1,13 +1,24 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import os
+import glob
+
 block_cipher = None
+
+# Windows DLL 경로 찾기
+system32_path = os.path.join(os.environ['SystemRoot'], 'System32')
+ucrt_dlls = glob.glob(os.path.join(system32_path, 'api-ms-win-*.dll'))
+extra_binaries = []
+for dll in ucrt_dlls:
+    if os.path.exists(dll):
+        extra_binaries.append((os.path.basename(dll), dll, 'BINARY'))
 
 a = Analysis(
     ['src/main.py'],
     pathex=[],
-    binaries=[],
+    binaries=extra_binaries,
     datas=[],
-    hiddenimports=['babel.numbers', 'tzdata'],
+    hiddenimports=['babel.numbers', 'tzdata', 'tkcalendar'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
@@ -17,11 +28,6 @@ a = Analysis(
     cipher=block_cipher,
     noarchive=False,
 )
-
-# Windows DLL 문제 해결을 위한 설정
-a.binaries = a.binaries + [
-    ('api-ms-win-core-path-l1-1-0.dll', 'C:\\Windows\\System32\\api-ms-win-core-path-l1-1-0.dll', 'BINARY'),
-]
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
