@@ -34,12 +34,7 @@ jobs:
         
     - name: Build with PyInstaller
       run: |
-        pyinstaller --clean `
-                   --add-data "C:\hostedtoolcache\windows\Python\${{ matrix.python-version }}\x64\Lib\site-packages\tzdata;tzdata" `
-                   --hidden-import tzdata `
-                   --hidden-import babel.numbers `
-                   --collect-all tkcalendar `
-                   main.spec
+        pyinstaller --clean main.spec
         
     - name: Create Release
       id: create_release
