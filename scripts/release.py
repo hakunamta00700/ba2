@@ -140,9 +140,19 @@ def main():
         current_directory = os.getcwd()
         print(f"현재 폴더 경로: {current_directory}")
         
+        # version.py 파일 경로 확인
+        version_file = project_root / 'src' / 'config' / 'version.py'
+        print(f"version.py 파일 경로: {version_file}")
+        
+        # version.py 파일 직접 읽어서 확인
+        with open(version_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+            print(f"version.py 파일 내용:\n{content}")
+        
         # 현재 버전 확인
         current_version = VERSION
-        print(f"현재 버전: {current_version}")
+        print(f"임포트된 VERSION: {current_version}")
+        
         # 새 버전 번호 생성
         new_version = increment_version(current_version)
         print(f"새 버전: {new_version}")
