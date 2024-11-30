@@ -5,27 +5,39 @@ import tempfile
 import zipfile
 from packaging import version
 from config.version import VERSION, GITHUB_REPO
+from dotenv import load_dotenv
 
 class UpdateService:
     def __init__(self):
+        # .env 파일 로드
+        load_dotenv()
+        
         self.current_version = VERSION
         self.github_api_url = f"https://api.github.com/repos/{GITHUB_REPO}/releases"
+        self.github_token = os.getenv('GITHUB_TOKEN')
+        self.headers = {
+            'Authorization': f'token {self.github_token}',
+            'Accept': 'application/vnd.github.v3+json'
+        } if self.github_token else {}
         
     def check_for_updates(self):
         """최신 버전이 있는지 확인"""
         try:
             # 모든 릴리즈를 가져옴
-            response = requests.get(self.github_api_url)
+            response = requests.get(self.github_api_url, headers=self.headers)
             response.raise_for_status()
             
             releases = response.json()
-            if not releases:  # 릴리즈가 없는 경우
-                print("아직 릴리즈가 없습니다.")
+            if not releases:
+                print("릴리즈를 찾을 수 없습니다.")
                 return False
             
-            # 가장 최신 릴리즈 확인
+            # 가장 최신 릴리즈 찾기
             latest_release = releases[0]  # GitHub API는 최신 순으로 정렬됨
             latest_version = latest_release['tag_name'].lstrip('v')
+            
+            print(f"현재 버전: v{self.current_version}")
+            print(f"최신 버전: v{latest_version}")
             
             current_ver = version.parse(self.current_version)
             latest_ver = version.parse(latest_version)
@@ -38,25 +50,26 @@ class UpdateService:
                 return False
                 
         except requests.exceptions.RequestException as e:
-            if isinstance(e, requests.exceptions.HTTPError) and e.response.status_code == 404:
-                print("저장소에서 릴리즈를 찾을 수 없습니다. 첫 릴리즈를 기다려주세요.")
-            else:
-                print(f"업데이트 확인 중 오류 발생: {e}")
+            print(f"업데이트 확인 중 오류 발생: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"응답 내용: {e.response.text}")
             return False
-            
+    
     def download_and_install_update(self):
         """최신 버전 다운로드 및 설치"""
         try:
-            response = requests.get(self.github_api_url)
+            response = requests.get(self.github_api_url, headers=self.headers)
             response.raise_for_status()
             
             releases = response.json()
             if not releases:
                 print("다운로드할 릴리즈가 없습니다.")
                 return False
-                
+            
             latest_release = releases[0]
             download_url = latest_release['zipball_url']
+            
+            print(f"다운로드 URL: {download_url}")
             
             # 임시 디렉토리에 다운로드
             with tempfile.TemporaryDirectory() as temp_dir:
@@ -64,7 +77,9 @@ class UpdateService:
                 
                 # 업데이트 파일 다운로드
                 print("업데이트 파일 다운로드 중...")
-                response = requests.get(download_url)
+                response = requests.get(download_url, headers=self.headers)
+                response.raise_for_status()
+                
                 with open(zip_path, 'wb') as f:
                     f.write(response.content)
                 
@@ -73,13 +88,15 @@ class UpdateService:
                 with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                     zip_ref.extractall(temp_dir)
                 
-                # 여기서 실제 업데이트 프로세스 실행
+                # 실제 업데이트 수행
                 print("업데이트 설치 중...")
                 self._perform_update(temp_dir)
                 
             return True
         except Exception as e:
             print(f"업데이트 설치 중 오류 발생: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"응답 내용: {e.response.text}")
             return False
     
     def _perform_update(self, update_dir):

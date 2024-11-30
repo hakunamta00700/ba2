@@ -1,8 +1,12 @@
 import os
 from dotenv import load_dotenv
 
-# .env 파일의 경로를 프로젝트 루트 기준으로 수정
-load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env'))
+# .env 파일 경로 계산
+env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env')
+print(f"Loading .env from: {env_path}")
+
+# .env 파일 로드
+load_dotenv(env_path)
 
 class Settings:
     # API 설정
