@@ -113,7 +113,7 @@ class UpdateService:
     
     def _create_update_script(self, current_exe, update_dir):
         """업데이트 스크립트 생성"""
-        script_content = f'''
+        script_content = f'''# -*- coding: utf-8 -*-
 import os
 import shutil
 import time
@@ -140,6 +140,7 @@ os.startfile("{current_exe}")
 '''
         
         script_path = os.path.join(tempfile.gettempdir(), 'update_script.py')
-        with open(script_path, 'w') as f:
+        # UTF-8 인코딩으로 파일 작성
+        with open(script_path, 'w', encoding='utf-8') as f:
             f.write(script_content)
         return script_path 
