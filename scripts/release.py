@@ -7,15 +7,29 @@ from pathlib import Path
 
 import requests
 from dotenv import load_dotenv
+import importlib
 
 # 프로젝트 루트 디렉토리 찾기
 project_root = Path(__file__).parent.parent
+print("프로젝트 루트 디렉토리:", project_root)
 sys.path.append(str(project_root))
 
 # .env 파일 로드
 load_dotenv(project_root / '.env')
 
-from src.config.version import GITHUB_REPO, VERSION
+# version 모듈을 직접 읽어서 VERSION 값을 가져오기
+def get_current_version():
+    version_file = project_root / 'src' / 'config' / 'version.py'
+    namespace = {}
+    with open(version_file, 'r', encoding='utf-8') as f:
+        exec(f.read(), namespace)
+    return namespace['VERSION']
+
+# 기존 임포트는 GITHUB_REPO만을 위해 유지
+from src.config.version import GITHUB_REPO
+
+# VERSION은 직접 읽어옴
+VERSION = get_current_version()
 
 
 class ReleaseManager:
