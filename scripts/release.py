@@ -1,11 +1,12 @@
-import os
-import sys
-import requests
 import json
-from pathlib import Path
+import os
 import re
-from dotenv import load_dotenv
 import subprocess  # Git 명령어 실행을 위해 추가
+import sys
+from pathlib import Path
+
+import requests
+from dotenv import load_dotenv
 
 # 프로젝트 루트 디렉토리 찾기
 project_root = Path(__file__).parent.parent
@@ -14,7 +15,8 @@ sys.path.append(str(project_root))
 # .env 파일 로드
 load_dotenv(project_root / '.env')
 
-from src.config.version import VERSION, GITHUB_REPO
+from src.config.version import GITHUB_REPO, VERSION
+
 
 class ReleaseManager:
     def __init__(self):
@@ -134,10 +136,13 @@ def main():
     try:
         release_manager = ReleaseManager()
         
+        # 현재 폴더 경로 출력
+        current_directory = os.getcwd()
+        print(f"현재 폴더 경로: {current_directory}")
+        
         # 현재 버전 확인
         current_version = VERSION
         print(f"현재 버전: {current_version}")
-        
         # 새 버전 번호 생성
         new_version = increment_version(current_version)
         print(f"새 버전: {new_version}")
