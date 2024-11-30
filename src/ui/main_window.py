@@ -348,10 +348,10 @@ class MainWindow:
         self.scanning_in_progress = False
 
     def open_other_file(self):
-        """부품 카운터 프로그램 실행"""
-        current_directory = os.path.dirname(os.path.abspath(__file__))
-        target_script = os.path.join(current_directory, "parts_counter.py")
-        subprocess.Popen(["python", target_script]) 
+        """부품 카운터 창을 모달로 열기"""
+        from .parts_counter import PartsCounterWindow
+        counter_window = PartsCounterWindow(self.root)
+        self.root.wait_window(counter_window)  # 모달 창이 닫힐 때까지 대기
 
     def auto_tab(self, event, next_widget):
         """바코드 입력 필드 자동 탭 처리"""

@@ -2,15 +2,18 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from datetime import datetime, time, timedelta
 import re
-from tkcalendar import Calendar  # Import the Calendar widget
+from tkcalendar import Calendar
 
-class Application(tk.Frame):
-    def __init__(self, master=None):
-        super().__init__(master)
-        self.master = master
-        self.pack()
+class PartsCounterWindow(tk.Toplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.title("Parts Counter")
+        self.geometry("500x500")
+        self.transient(parent)
+        self.grab_set()
+        
+        self.overtime_file = "overtime.txt"
         self.create_widgets()
-        self.overtime_file = "overtime.txt"  # File to store overtime info
 
     def create_widgets(self):
         self.select_file_btn = tk.Button(self)
@@ -36,10 +39,9 @@ class Application(tk.Frame):
 
         self.date_label = tk.Label(self, text="Select date:")
         self.date_label.pack()
-        self.date_calendar = Calendar(self)  # Create the Calendar widget
+        self.date_calendar = Calendar(self)
         self.date_calendar.pack()
 
-        # New widgets for time range
         self.time_start_label = tk.Label(self, text="Start Time (HH:MM):")
         self.time_start_label.pack()
         self.time_start_entry = tk.Entry(self)
@@ -65,14 +67,12 @@ class Application(tk.Frame):
             
             shift_start = shift_start_times[self.shift_var.get() - 1]
             shift_end = shift_end_times[self.shift_var.get() - 1]
-            selected_date = self.date_calendar.get_date()  # Get the selected date from the Calendar widget
+            selected_date = self.date_calendar.get_date()
             
-            # Adjust end time for overtime of current shift
             current_shift_overtime = int(self.ot_entry.get())
             if current_shift_overtime:
                 shift_end = (datetime.combine(datetime.today(), shift_end) + timedelta(hours=current_shift_overtime)).time()
 
-            # Get user-specified time range
             time_start_str = self.time_start_entry.get()
             time_end_str = self.time_end_entry.get()
             
@@ -89,7 +89,7 @@ class Application(tk.Frame):
                     if match:
                         date_str = match.group()
                         line_date, line_time = date_str.rsplit(' ', 1)
-                        if selected_date_str in line_date:  # Compare with selected date
+                        if selected_date_str in line_date:
                             line_time_obj = datetime.strptime(line_time, '%H:%M').time()
                             if ((time_start < time_end and time_start <= line_time_obj < time_end) or
                                 (time_start > time_end and (line_time_obj >= time_start or line_time_obj < time_end))):
@@ -98,7 +98,6 @@ class Application(tk.Frame):
             total_parts = num_lines
             messagebox.showinfo("Total Parts Produced", f"Total parts produced in the selected time range: {total_parts}")
 
-            # Store overtime for this shift
             self.store_overtime(current_shift_overtime)
         except Exception as e:
             messagebox.showerror("Error", str(e))
@@ -106,12 +105,6 @@ class Application(tk.Frame):
     def store_overtime(self, overtime):
         try:
             with open(self.overtime_file, 'a') as f:
-                f.write(f"{self.shift_var.get()},{overtime}\n")  # Store shift number and overtime
+                f.write(f"{self.shift_var.get()},{overtime}\n")
         except Exception as e:
             messagebox.showerror("Error", str(e))
-
-root = tk.Tk()
-root.geometry("500x500")
-root.attributes("-topmost", True)
-app = Application(master=root)
-app.mainloop()
