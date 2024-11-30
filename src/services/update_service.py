@@ -61,7 +61,7 @@ class UpdateService:
             return False
     
     def download_and_install_update(self):
-        """최신 버전 다운로드 및 설치"""
+        """최신 버전 다운로드 및 설치 1111"""
         temp_dir = None
         try:
             response = requests.get(self.github_api_url, headers=self.headers)
