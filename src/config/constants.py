@@ -36,11 +36,12 @@ FILE_PATHS = {
     for tray in config.trays
     for uc in config.ucs
     if uc.id in tray.allowedUCs
-} | {
+}
+FILE_PATHS.update({
     "UNKNOWN": "barcodes_unknown.txt",
     "LOCAL_DATA": "local_data.txt",
     "SCAN_LOG": "scan_log.txt"
-}
+})
 
 # API 관련 상수
 API_CONFIG = {

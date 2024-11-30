@@ -1,6 +1,6 @@
 import json
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional, Tuple
 import os
 import sys
 from pathlib import Path
@@ -69,3 +69,13 @@ class ConfigManager:
         for tray in self.trays:
             tray.allowedUCs = [uc for uc in tray.allowedUCs if uc != uc_id]
         self.save_config() 
+
+    def process_barcodes(self, tray_id: str, uc_id: str, *barcodes: str) -> Tuple[List[str], List[str]]:
+        # Implementation for processing barcodes
+        pass 
+
+def safe_unlink(path):
+    try:
+        Path(path).unlink()
+    except FileNotFoundError:
+        pass

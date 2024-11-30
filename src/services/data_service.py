@@ -4,6 +4,9 @@ import requests
 from requests.exceptions import ConnectionError, Timeout, RequestException
 import socket
 import os
+import aiohttp
+from pathlib import Path
+import asyncio
 
 from config.constants import (
     API_CONFIG,
@@ -105,6 +108,21 @@ class DataService:
     def ensure_barcode_files_exist(self):
         """필요한 바코드 파일들이 존재하는지 확인하고 없으면 생성"""
         for filepath in FILE_PATHS.values():
-            if not os.path.exists(filepath):
-                with open(filepath, 'w') as f:
-                    pass  # 빈 파일 생성 
+            try:
+                with open(filepath, 'a'):
+                    pass
+            except IOError:
+                print(f"Error creating file: {filepath}")
+
+    async def async_send_data(self, data):
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(self.url, data=data) as response:
+                    return await response.text()
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+
+    def async_send_data_wrapper(self, data):
+        loop = asyncio.get_event_loop()
+        return loop.run_until_complete(self.async_send_data(data))

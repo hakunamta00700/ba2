@@ -75,5 +75,5 @@ class BarcodeService:
         try:
             barcode_number = int(barcode[4:])
             return barcode_number >= BARCODE["MIN_SERIES_NUMBER"]
-        except ValueError:
+        except (ValueError, IndexError):
             return False
