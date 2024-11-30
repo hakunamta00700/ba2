@@ -24,3 +24,4 @@ scripts/setup_token.ps1
 .env
 src/build/*
 .venv/*
+build/*
