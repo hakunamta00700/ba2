@@ -10,6 +10,7 @@ import subprocess
 import traceback
 import shutil
 import time
+import re
 
 class UpdateService:
     def __init__(self):
@@ -156,6 +157,25 @@ import time
 import subprocess
 import sys
 import traceback
+import re
+
+def update_version_file(target_dir, latest_version):
+    """version.py 파일의 버전 정보 업데이트"""
+    version_file = os.path.join(target_dir, 'src', 'config', 'version.py')
+    if os.path.exists(version_file):
+        with open(version_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # VERSION 변수 업데이트
+        new_content = re.sub(
+            r'VERSION = "[^"]+"',
+            f'VERSION = "{latest_version}"',
+            content
+        )
+        
+        with open(version_file, 'w', encoding='utf-8') as f:
+            f.write(new_content)
+        print(f"버전 정보를 {latest_version}로 업데이트했습니다.")
 
 def main():
     try:
@@ -190,6 +210,16 @@ def main():
                     print(f"복사 중: {{relative_path}}")
                     os.makedirs(os.path.dirname(target_path), exist_ok=True)
                     shutil.copy2(source_path, target_path)
+
+        # version.py 파일 업데이트
+        version_file = os.path.join(source_dir, 'config', 'version.py')
+        if os.path.exists(version_file):
+            with open(version_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+                version_match = re.search(r'VERSION = "([^"]+)"', content)
+                if version_match:
+                    latest_version = version_match.group(1)
+                    update_version_file(target_dir, latest_version)
 
         print("업데이트 완료. 프로그램을 재시작합니다...")
         
