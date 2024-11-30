@@ -228,21 +228,34 @@ def main():
         main_script = os.path.join(target_dir, "src", "main.py")
         
         # 프로그램 재시작
-        process = subprocess.Popen(
-            [python_exe, main_script],
-            cwd=target_dir,
-            creationflags=subprocess.CREATE_NEW_CONSOLE
-        )
-        
-        # 프로세스가 시작되었는지 확인
-        time.sleep(2)
-        if process.poll() is None:
-            print("프로그램이 성공적으로 재시작되었습니다.")
-            time.sleep(1)
-        else:
-            print("프로그램 시작 실패")
-            input("계속하려면 아무 키나 누르세요...")
+        try:
+            # 현재 작업 디렉토리를 target_dir로 변경
+            os.chdir(target_dir)
             
+            # 프로그램 재시작
+            process = subprocess.Popen(
+                [python_exe, main_script],
+                creationflags=subprocess.CREATE_NEW_CONSOLE,
+                cwd=target_dir,
+                env=os.environ.copy()  # 현재 환경 변수 복사
+            )
+            
+            # 프로세스가 시작되었는지 확인
+            time.sleep(2)
+            if process.poll() is None:
+                print("프로그램이 성공적으로 재시작되었습니다.")
+                time.sleep(1)
+            else:
+                print(f"프로그램 시작 실패 - 수동으로 실행해주세요: {main_script}")
+                print(f"실행 명령어: {python_exe} {main_script}")
+                input("계속하려면 아무 키나 누르세요...")
+                
+        except Exception as e:
+            print(f"프로그램 재시작 중 오류 발생: {e}")
+            print(f"수동으로 다음 명령어를 실행해주세요:")
+            print(f"{python_exe} {main_script}")
+            input("계속하려면 아무 키나 누르세요...")
+
     except Exception as e:
         print(f"업데이트 중 오류 발생: {{e}}")
         print("상세 오류:")
