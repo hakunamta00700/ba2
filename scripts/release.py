@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import re
 from dotenv import load_dotenv
+import subprocess  # Git 명령어 실행을 위해 추가
 
 # 프로젝트 루트 디렉토리 찾기
 project_root = Path(__file__).parent.parent
@@ -31,12 +32,53 @@ class ReleaseManager:
             'Accept': 'application/vnd.github.v3+json'
         }
 
+    def create_git_tag(self, version_tag):
+        """Git 태그 생성 및 푸시"""
+        try:
+            # 변경사항 커밋
+            subprocess.run(['git', 'add', 'src/config/version.py'], check=True)
+            subprocess.run(['git', 'commit', '-m', f'chore: bump version to v{version_tag}'], check=True)
+            
+            # 태그 생성
+            tag_name = f'v{version_tag}'
+            subprocess.run(['git', 'tag', '-a', tag_name, '-m', f'Release {tag_name}'], check=True)
+            
+            # 변경사항과 태그 푸시
+            subprocess.run(['git', 'push'], check=True)
+            subprocess.run(['git', 'push', 'origin', tag_name], check=True)
+            
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"Git 작업 중 오류 발생: {e}")
+            return False
+
+    def get_current_branch(self):
+        """현재 Git 브랜치 이름 가져오기"""
+        try:
+            result = subprocess.run(
+                ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            return result.stdout.strip()
+        except subprocess.CalledProcessError as e:
+            print(f"브랜치 확인 중 오류 발생: {e}")
+            return 'main'  # 기본값
+
     def create_release(self, version_tag, release_notes):
         """GitHub 릴리즈 생성"""
+        # 먼저 Git 태그 생성
+        if not self.create_git_tag(version_tag):
+            return False
+
+        # 현재 브랜치 확인
+        current_branch = self.get_current_branch()
+        
         url = f"{self.api_url}/releases"
         data = {
             'tag_name': f'v{version_tag}',
-            'target_commitish': 'main',
+            'target_commitish': current_branch,  # 현재 브랜치 사용
             'name': f'Release v{version_tag}',
             'body': release_notes,
             'draft': False,
