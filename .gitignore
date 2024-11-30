@@ -22,3 +22,4 @@ __pycache__/*.*
 scripts/setup_token.ps1
 # 환경 변수 파일
 .env
+src/build/*
