@@ -2,6 +2,7 @@ import json
 from dataclasses import dataclass
 from typing import List
 import os
+from pathlib import Path
 
 @dataclass
 class UCConfig:
@@ -17,12 +18,13 @@ class TrayConfig:
 
 class ConfigManager:
     def __init__(self):
-        self.config_file = os.path.join(os.path.dirname(__file__), "config.json")
+        root_dir = Path(__file__).parent.parent.parent
+        self.config_file = root_dir / "config.json"
         self.load_config()
     
     def load_config(self):
         try:
-            with open(self.config_file, 'r') as f:
+            with self.config_file.open('r') as f:
                 data = json.load(f)
                 self.trays = [TrayConfig(**tray) for tray in data['trays']]
                 self.ucs = [UCConfig(**uc) for uc in data['ucs']]
@@ -57,7 +59,7 @@ class ConfigManager:
             'trays': [vars(tray) for tray in self.trays],
             'ucs': [vars(uc) for uc in self.ucs]
         }
-        with open(self.config_file, 'w') as f:
+        with self.config_file.open('w') as f:
             json.dump(data, f, indent=2)
             
     def add_uc(self, uc_config: UCConfig):

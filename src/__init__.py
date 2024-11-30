@@ -1,3 +1,0 @@
-"""
-Daejin barcode verification program
-""" 
