@@ -46,9 +46,12 @@ jobs:
         draft: false
         prerelease: false
         
-    - name: Zip dist folder
+    - name: Zip main.exe only
       run: |
-        Compress-Archive -Path dist/* -DestinationPath windows-build-py${{ matrix.python-version }}.zip
+        New-Item -ItemType Directory -Path temp
+        Copy-Item -Path dist/main.exe -Destination temp/
+        Compress-Archive -Path temp/main.exe -DestinationPath windows-build-py${{ matrix.python-version }}.zip
+        Remove-Item -Path temp -Recurse
         
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
